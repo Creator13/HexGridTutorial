@@ -14,4 +14,14 @@ public static class HexDirectionExtensions {
     public static HexDirection Next(this HexDirection dir) {
         return dir == HexDirection.NW ? HexDirection.NE : dir + 1;
     }
+
+    public static HexDirection Previous2(this HexDirection dir) {
+        dir -= 2;
+        return dir >= HexDirection.NE ? dir : dir + 6;
+    }
+    
+    public static HexDirection Next2(this HexDirection dir) {
+        dir += 2;
+        return dir <= HexDirection.NW ? dir : dir - 6;
+    }
 }
