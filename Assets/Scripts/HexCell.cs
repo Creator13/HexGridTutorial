@@ -58,6 +58,8 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+    
     public Vector3 Position => transform.localPosition;
 
     [SerializeField] private HexCell[] neighbours;

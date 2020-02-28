@@ -21,8 +21,8 @@ public class HexMesh : MonoBehaviour {
         triangles.Clear();
         colors.Clear();
 
-        for (var i = 0; i < cells.Length; i++) {
-            Triangulate(cells[i]);
+        foreach (var cell in cells) {
+            Triangulate(cell);
         }
 
         hexMesh.vertices = vertices.ToArray();
@@ -45,6 +45,10 @@ public class HexMesh : MonoBehaviour {
             center + HexMetrics.GetSecondSolidCorner(dir)
         );
 
+        if (cell.HasRiverThroughEdge(dir)) {
+            e.v3.y = cell.StreamBedY;
+        }
+
         TriangulateEdgeFan(center, e, cell.Color);
 
         if (dir <= HexDirection.SE) {
@@ -59,6 +63,8 @@ public class HexMesh : MonoBehaviour {
         AddTriangleColor(color);
         AddTriangle(center, edge.v3, edge.v4);
         AddTriangleColor(color);
+        AddTriangle(center, edge.v4, edge.v5);
+        AddTriangleColor(color);
     }
 
     private void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2) {
@@ -67,6 +73,8 @@ public class HexMesh : MonoBehaviour {
         AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
         AddQuadColor(c1, c2);
         AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+        AddQuadColor(c1, c2);
+        AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
         AddQuadColor(c1, c2);
     }
 
@@ -77,12 +85,13 @@ public class HexMesh : MonoBehaviour {
         }
 
         var bridge = HexMetrics.GetBridge(dir);
-        // var v3 = v1 + bridge;
-        // var v4 = v2 + bridge;
-        // v3.y = v4.y = neighbor.Position.y;
         bridge.y = neighbor.Position.y - cell.Position.y;
-        var e2 = new EdgeVertices(e1.v1 + bridge, e1.v4 + bridge);
+        var e2 = new EdgeVertices(e1.v1 + bridge, e1.v5 + bridge);
 
+        if (cell.HasRiverThroughEdge(dir)) {
+            e2.v3.y = neighbor.StreamBedY;
+        }
+        
         // Create cell edge
         if (cell.GetEdgeType(dir) == HexEdgeType.Slope) {
             TriangulateEdgeTerraces(e1, cell, e2, neighbor);
@@ -94,23 +103,23 @@ public class HexMesh : MonoBehaviour {
         // Create corner triangle
         var nextNeighbor = cell.GetNeighbour(dir.Next());
         if (dir <= HexDirection.E && nextNeighbor != null) {
-            var v5 = e1.v4 + HexMetrics.GetBridge(dir.Next());
+            var v5 = e1.v5 + HexMetrics.GetBridge(dir.Next());
             v5.y = nextNeighbor.Position.y;
 
             // Figure out the order in which to orient the corner triangle
             if (cell.Elevation <= neighbor.Elevation) {
                 if (cell.Elevation <= nextNeighbor.Elevation) {
-                    TriangulateCorner(e1.v4, cell, e2.v4, neighbor, v5, nextNeighbor);
+                    TriangulateCorner(e1.v5, cell, e2.v5, neighbor, v5, nextNeighbor);
                 }
                 else {
-                    TriangulateCorner(v5, nextNeighbor, e1.v4, cell, e2.v4, neighbor);
+                    TriangulateCorner(v5, nextNeighbor, e1.v5, cell, e2.v5, neighbor);
                 }
             }
             else if (neighbor.Elevation <= nextNeighbor.Elevation) {
-                TriangulateCorner(e2.v4, neighbor, v5, nextNeighbor, e1.v4, cell);
+                TriangulateCorner(e2.v5, neighbor, v5, nextNeighbor, e1.v5, cell);
             }
             else {
-                TriangulateCorner(v5, nextNeighbor, e1.v4, cell, e2.v4, neighbor);
+                TriangulateCorner(v5, nextNeighbor, e1.v5, cell, e2.v5, neighbor);
             }
         }
     }
