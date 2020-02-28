@@ -46,8 +46,9 @@ MonoBehaviour:
   coordinates:
     x: 0
     z: 0
-  color: {r: 0, g: 0, b: 0, a: 0}
-  neighbors:
+  uiRect: {fileID: 0}
+  chunk: {fileID: 0}
+  neighbours:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
