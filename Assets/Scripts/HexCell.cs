@@ -59,6 +59,8 @@ public class HexCell : MonoBehaviour {
     }
 
     public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+    public float RiverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
     
     public Vector3 Position => transform.localPosition;
 

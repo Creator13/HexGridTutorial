@@ -2990,6 +2990,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78c3470746904a7a925661e47015c0cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useCollider: 0
+  useColors: 0
+  useUVCoordinates: 0
 --- !u!23 &1477622085
 MeshRenderer:
   m_ObjectHideFlags: 0
