@@ -59,7 +59,7 @@ public class HexMapEditor : MonoBehaviour {
 
     private void ValidateDrag(HexCell currentCell) {
         for (dragDir = HexDirection.NE; dragDir <= HexDirection.NW; dragDir++) {
-            if (previousCell.GetNeighbour(dragDir) == currentCell) {
+            if (previousCell.GetNeighbor(dragDir) == currentCell) {
                 isDrag = true;
                 return;
             }
@@ -99,7 +99,7 @@ public class HexMapEditor : MonoBehaviour {
                 cell.RemoveRiver();
             }
             else if (isDrag && riverMode == OptionalToggle.Yes) {
-                var otherCell = cell.GetNeighbour(dragDir.Opposite());
+                var otherCell = cell.GetNeighbor(dragDir.Opposite());
                 if (otherCell) {
                     otherCell.SetOutgoingRiver(dragDir);
                 }

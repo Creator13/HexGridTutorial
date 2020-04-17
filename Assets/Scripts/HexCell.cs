@@ -34,11 +34,11 @@ public class HexCell : MonoBehaviour {
             uiPos.z = -pos.y;
             uiRect.localPosition = uiPos;
 
-            if (hasOutgoingRiver && elevation < GetNeighbour(outgoingRiver).elevation) {
+            if (hasOutgoingRiver && elevation < GetNeighbor(outgoingRiver).elevation) {
                 RemoveOutgoingRiver();
             }
 
-            if (hasIncomingRiver && elevation > GetNeighbour(incomingRiver).elevation) {
+            if (hasIncomingRiver && elevation > GetNeighbor(incomingRiver).elevation) {
                 RemoveIncomingRiver();
             }
             
@@ -66,7 +66,7 @@ public class HexCell : MonoBehaviour {
 
     [SerializeField] private HexCell[] neighbours;
 
-    public HexCell GetNeighbour(HexDirection dir) {
+    public HexCell GetNeighbor(HexDirection dir) {
         return neighbours[(int) dir];
     }
 
@@ -95,7 +95,7 @@ public class HexCell : MonoBehaviour {
         hasOutgoingRiver = false;
         RefreshSelfOnly();
 
-        var neighbour = GetNeighbour(outgoingRiver);
+        var neighbour = GetNeighbor(outgoingRiver);
         neighbour.hasIncomingRiver = false;
         neighbour.RefreshSelfOnly();
     }
@@ -108,7 +108,7 @@ public class HexCell : MonoBehaviour {
         hasIncomingRiver = false;
         RefreshSelfOnly();
 
-        var neighbour = GetNeighbour(incomingRiver);
+        var neighbour = GetNeighbor(incomingRiver);
         neighbour.hasOutgoingRiver = false;
         neighbour.RefreshSelfOnly();
     }
@@ -123,7 +123,7 @@ public class HexCell : MonoBehaviour {
             return;
         }
 
-        var neighbour = GetNeighbour(dir);
+        var neighbour = GetNeighbor(dir);
         if (!neighbour || elevation < neighbour.elevation) {
             return;
         }

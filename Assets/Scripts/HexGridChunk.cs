@@ -208,7 +208,7 @@ public class HexGridChunk : MonoBehaviour {
     }
 
     private void TriangulateConnection(HexDirection dir, HexCell cell, EdgeVertices e1) {
-        var neighbor = cell.GetNeighbour(dir);
+        var neighbor = cell.GetNeighbor(dir);
         if (neighbor == null) {
             return;
         }
@@ -235,7 +235,7 @@ public class HexGridChunk : MonoBehaviour {
         }
 
         // Create corner triangle
-        var nextNeighbor = cell.GetNeighbour(dir.Next());
+        var nextNeighbor = cell.GetNeighbor(dir.Next());
         if (dir <= HexDirection.E && nextNeighbor != null) {
             var v5 = e1.v5 + HexMetrics.GetBridge(dir.Next());
             v5.y = nextNeighbor.Position.y;
