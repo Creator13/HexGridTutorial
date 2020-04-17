@@ -135,6 +135,6 @@ public class HexMesh : MonoBehaviour {
         uvs.Add(new Vector2(uMin, vMin));
         uvs.Add(new Vector2(uMax, vMin));
         uvs.Add(new Vector2(uMin, vMax));
-        uvs.Add(new Vector2(vMax, vMax));
+        uvs.Add(new Vector2(uMax, vMax));
     }
 }
