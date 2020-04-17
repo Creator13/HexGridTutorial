@@ -24,11 +24,11 @@ public static class HexMetrics {
 
     public static Texture2D noiseSource;
 
-    public const float cellPerturbStrength = 0; // 4f;
+    public const float cellPerturbStrength = 4f;
     public const float noiseScale = 0.003f;
     public const float elevationPerturbStrength = 1.5f;
 
-    public const float streamBedElevationOffset = -1f;
+    public const float streamBedElevationOffset = -1.75f;
 
     public const float riverSurfaceElevationOffset = -.5f;
 
