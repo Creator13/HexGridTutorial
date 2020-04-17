@@ -98,4 +98,11 @@ public static class HexMetrics {
     public static Vector4 SampleNoise(Vector3 pos) {
         return noiseSource.GetPixelBilinear(pos.x * noiseScale, pos.z * noiseScale);
     }
+    
+    public static Vector3 Perturb(Vector3 pos) {
+        var sample = HexMetrics.SampleNoise(pos);
+        pos.x += (sample.x * 2f - 1f) * HexMetrics.cellPerturbStrength;
+        pos.z += (sample.z * 2f - 1f) * HexMetrics.cellPerturbStrength;
+        return pos;
+    }
 }
