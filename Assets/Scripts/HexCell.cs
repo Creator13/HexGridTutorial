@@ -12,9 +12,9 @@ public class HexCell : MonoBehaviour {
     private bool hasIncomingRiver, hasOutgoingRiver;
     private HexDirection incomingRiver, outgoingRiver;
 
-    [SerializeField] private bool[] roads;
+    [SerializeField] private bool[] roads = new bool[6];
 
-    [SerializeField] private HexCell[] neighbors;
+    [SerializeField] private HexCell[] neighbors = new HexCell[6];
 
     public bool HasIncomingRiver => hasIncomingRiver;
     public bool HasOutgoingRiver => hasOutgoingRiver;

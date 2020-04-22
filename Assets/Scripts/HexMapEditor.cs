@@ -2,11 +2,7 @@
 using UnityEngine.EventSystems;
 
 public class HexMapEditor : MonoBehaviour {
-    private enum OptionalToggle {
-        Ignore,
-        Yes,
-        No
-    }
+    private enum OptionalToggle { Ignore, Yes, No }
 
     [SerializeField] private Color[] colors;
     [SerializeField] private HexGrid hexGrid;
@@ -14,7 +10,7 @@ public class HexMapEditor : MonoBehaviour {
     private int activeElevation;
     private Color activeColor;
     private int brushSize;
-    private OptionalToggle riverMode;
+    private OptionalToggle riverMode, roadMode;
 
     private bool applyColor;
     private bool applyElevation = true;
@@ -48,7 +44,7 @@ public class HexMapEditor : MonoBehaviour {
             else {
                 isDrag = false;
             }
-            
+
             EditCells(currentCell);
             previousCell = currentCell;
         }
@@ -98,10 +94,21 @@ public class HexMapEditor : MonoBehaviour {
             if (riverMode == OptionalToggle.No) {
                 cell.RemoveRiver();
             }
-            else if (isDrag && riverMode == OptionalToggle.Yes) {
+
+            if (roadMode == OptionalToggle.No) {
+                cell.RemoveRoads();
+            }
+
+            if (isDrag) {
                 var otherCell = cell.GetNeighbor(dragDir.Opposite());
                 if (otherCell) {
-                    otherCell.SetOutgoingRiver(dragDir);
+                    if (riverMode == OptionalToggle.Yes) {
+                        otherCell.SetOutgoingRiver(dragDir);
+                    }
+
+                    if (roadMode == OptionalToggle.Yes) {
+                        otherCell.AddRoad(dragDir);
+                    }
                 }
             }
         }
@@ -132,5 +139,9 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetRiverMode(int mode) {
         riverMode = (OptionalToggle) mode;
+    }
+
+    public void SetRoadMode(int mode) {
+        roadMode = (OptionalToggle) mode;
     }
 }
