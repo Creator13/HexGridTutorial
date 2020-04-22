@@ -92,20 +92,20 @@ public class HexGrid : MonoBehaviour {
         cell.Color = defaultColor;
 
         if (x > 0) {
-            cell.SetNeighbour(HexDirection.W, cells[i - 1]);
+            cell.SetNeighbor(HexDirection.W, cells[i - 1]);
         }
 
         if (z > 0) {
             if ((z & 1) == 0) {
-                cell.SetNeighbour(HexDirection.SE, cells[i - cellCountX]);
+                cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX]);
                 if (x > 0) {
-                    cell.SetNeighbour(HexDirection.SW, cells[i - cellCountX - 1]);
+                    cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
                 }
             }
             else {
-                cell.SetNeighbour(HexDirection.SW, cells[i - cellCountX]);
+                cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
                 if (x < cellCountX - 1) {
-                    cell.SetNeighbour(HexDirection.SE, cells[i - cellCountX + 1]);
+                    cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
                 }
             }
         }
