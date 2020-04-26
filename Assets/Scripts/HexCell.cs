@@ -18,8 +18,10 @@ public class HexCell : MonoBehaviour {
 
     public bool HasIncomingRiver => hasIncomingRiver;
     public bool HasOutgoingRiver => hasOutgoingRiver;
+    
     public HexDirection IncomingRiver => incomingRiver;
     public HexDirection OutgoingRiver => outgoingRiver;
+    public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 
     public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
