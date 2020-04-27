@@ -7,8 +7,6 @@ public class HexCell : MonoBehaviour {
     public RectTransform uiRect;
 
     public HexGridChunk chunk;
-
-    private int elevation = int.MinValue;
     private bool hasIncomingRiver, hasOutgoingRiver;
     private HexDirection incomingRiver, outgoingRiver;
 
@@ -18,13 +16,15 @@ public class HexCell : MonoBehaviour {
 
     public bool HasIncomingRiver => hasIncomingRiver;
     public bool HasOutgoingRiver => hasOutgoingRiver;
-    
+
     public HexDirection IncomingRiver => incomingRiver;
     public HexDirection OutgoingRiver => outgoingRiver;
     public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 
     public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+    
+    private int elevation = int.MinValue;
 
     public int Elevation {
         get => elevation;
@@ -55,7 +55,19 @@ public class HexCell : MonoBehaviour {
                     SetRoad(i, false);
                 }
             }
-            
+
+            Refresh();
+        }
+    }
+
+    private int waterLevel;
+
+    public int WaterLevel {
+        get => waterLevel;
+        set {
+            if (waterLevel == value) return;
+
+            waterLevel = value;
             Refresh();
         }
     }
@@ -74,11 +86,15 @@ public class HexCell : MonoBehaviour {
 
     public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
-    public float RiverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
+    public float RiverSurfaceY => (elevation + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
 
     public Vector3 Position => transform.localPosition;
 
     public bool HasRoads => roads.Any(b => b);
+
+    public bool IsUnderwater => WaterLevel > Elevation;
+
+    public float WaterSurfaceY => (waterLevel + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
 
     public HexCell GetNeighbor(HexDirection dir) {
         return neighbors[(int) dir];

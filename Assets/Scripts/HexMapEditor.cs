@@ -8,12 +8,14 @@ public class HexMapEditor : MonoBehaviour {
     [SerializeField] private HexGrid hexGrid;
 
     private int activeElevation;
+    private int activeWaterLevel;
     private Color activeColor;
     private int brushSize;
     private OptionalToggle riverMode, roadMode;
 
     private bool applyColor;
     private bool applyElevation = true;
+    private bool applyWaterLevel = true;
 
     private bool isDrag;
     private HexDirection dragDir;
@@ -91,6 +93,10 @@ public class HexMapEditor : MonoBehaviour {
                 cell.Elevation = activeElevation;
             }
 
+            if (applyWaterLevel) {
+                cell.WaterLevel = activeWaterLevel;
+            }
+            
             if (riverMode == OptionalToggle.No) {
                 cell.RemoveRiver();
             }
@@ -127,6 +133,14 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetApplyElevation(bool toggle) {
         applyElevation = toggle;
+    }
+
+    public void SetApplyWaterLevel(bool toggle) {
+        applyWaterLevel = toggle;
+    }
+
+    public void SetWaterLevel(float level) {
+        activeWaterLevel = (int) level;
     }
 
     public void SetBrushSize(float size) {

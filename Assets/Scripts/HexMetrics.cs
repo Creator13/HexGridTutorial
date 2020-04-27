@@ -30,7 +30,7 @@ public static class HexMetrics {
 
     public const float streamBedElevationOffset = -1.75f;
 
-    public const float riverSurfaceElevationOffset = -.5f;
+    public const float waterElevationOffset = -.5f;
 
     public const int chunkSizeX = 5, chunkSizeZ = 5;
 
@@ -69,11 +69,11 @@ public static class HexMetrics {
     }
 
     public static Vector3 TerraceLerp(Vector3 a, Vector3 b, int step) {
-        var h = step * HexMetrics.horizontalTerraceStepSize;
+        var h = step * horizontalTerraceStepSize;
         a.x += (b.x - a.x) * h;
         a.z += (b.z - a.z) * h;
 
-        var v = ((step + 1) / 2) * HexMetrics.verticalTerraceStepSize;
+        var v = ((step + 1) / 2) * verticalTerraceStepSize;
         a.y += (b.y - a.y) * v;
 
         return a;
@@ -102,9 +102,9 @@ public static class HexMetrics {
     }
     
     public static Vector3 Perturb(Vector3 pos) {
-        var sample = HexMetrics.SampleNoise(pos);
-        pos.x += (sample.x * 2f - 1f) * HexMetrics.cellPerturbStrength;
-        pos.z += (sample.z * 2f - 1f) * HexMetrics.cellPerturbStrength;
+        var sample = SampleNoise(pos);
+        pos.x += (sample.x * 2f - 1f) * cellPerturbStrength;
+        pos.z += (sample.z * 2f - 1f) * cellPerturbStrength;
         return pos;
     }
 }
