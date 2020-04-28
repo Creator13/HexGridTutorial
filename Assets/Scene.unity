@@ -3694,7 +3694,7 @@ MonoBehaviour:
     type: 3}
   chunkPrefab: {fileID: 8637424805678440612, guid: 1945edfeb7e45764a96d890eeef75666,
     type: 3}
-  noiseSource: {fileID: 2800000, guid: bc7ad4211d96ae74eb0a34887223e186, type: 3}
+  noiseSource: {fileID: 2800000, guid: a01e85b98aecc304f9774e70f5361ee3, type: 3}
 --- !u!4 &1267205980
 Transform:
   m_ObjectHideFlags: 0
