@@ -23,7 +23,7 @@ public class HexCell : MonoBehaviour {
 
     public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
-    
+
     private int elevation = int.MinValue;
 
     public int Elevation {
@@ -42,13 +42,7 @@ public class HexCell : MonoBehaviour {
             uiPos.z = -pos.y;
             uiRect.localPosition = uiPos;
 
-            if (hasOutgoingRiver && elevation < GetNeighbor(outgoingRiver).elevation) {
-                RemoveOutgoingRiver();
-            }
-
-            if (hasIncomingRiver && elevation > GetNeighbor(incomingRiver).elevation) {
-                RemoveIncomingRiver();
-            }
+            ValidateRivers();
 
             for (var i = 0; i < roads.Length; i++) {
                 if (roads[i] && GetElevationDifference((HexDirection) i) > 1) {
@@ -68,6 +62,7 @@ public class HexCell : MonoBehaviour {
             if (waterLevel == value) return;
 
             waterLevel = value;
+            ValidateRivers();
             Refresh();
         }
     }
@@ -125,6 +120,10 @@ public class HexCell : MonoBehaviour {
         return hasIncomingRiver && incomingRiver == dir || hasOutgoingRiver && outgoingRiver == dir;
     }
 
+    private bool IsValidRiverDestination(HexCell neighbor) {
+        return neighbor && (elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
+    }
+
     public void RemoveOutgoingRiver() {
         if (!hasOutgoingRiver) {
             return;
@@ -161,8 +160,8 @@ public class HexCell : MonoBehaviour {
             return;
         }
 
-        var neighbour = GetNeighbor(dir);
-        if (!neighbour || elevation < neighbour.elevation) {
+        var neighbor = GetNeighbor(dir);
+        if (!IsValidRiverDestination(neighbor)) {
             return;
         }
 
@@ -174,12 +173,22 @@ public class HexCell : MonoBehaviour {
         hasOutgoingRiver = true;
         outgoingRiver = dir;
 
-        neighbour.RemoveIncomingRiver();
-        neighbour.hasIncomingRiver = true;
-        neighbour.incomingRiver = dir.Opposite();
+        neighbor.RemoveIncomingRiver();
+        neighbor.hasIncomingRiver = true;
+        neighbor.incomingRiver = dir.Opposite();
 
         // Also refreshes both cells
         SetRoad((int) dir, false);
+    }
+
+    private void ValidateRivers() {
+        if (hasOutgoingRiver && !IsValidRiverDestination(GetNeighbor(outgoingRiver))) {
+            RemoveOutgoingRiver();
+        }
+
+        if (hasIncomingRiver && !GetNeighbor(incomingRiver).IsValidRiverDestination(this)) {
+            RemoveIncomingRiver();
+        }
     }
 
     #endregion
