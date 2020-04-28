@@ -3,7 +3,7 @@
 public class HexGridChunk : MonoBehaviour {
     private HexCell[] cells;
 
-    public HexMesh terrain, rivers, roads;
+    public HexMesh terrain, rivers, roads, water;
     private Canvas gridCanvas;
 
     private void Awake() {
@@ -37,6 +37,7 @@ public class HexGridChunk : MonoBehaviour {
         terrain.Clear();
         rivers.Clear();
         roads.Clear();
+        water.Clear();
 
         foreach (var cell in cells) {
             Triangulate(cell);
@@ -45,6 +46,7 @@ public class HexGridChunk : MonoBehaviour {
         terrain.Apply();
         rivers.Apply();
         roads.Apply();
+        water.Apply();
     }
 
     private void Triangulate(HexCell cell) {
@@ -80,6 +82,40 @@ public class HexGridChunk : MonoBehaviour {
 
         if (dir <= HexDirection.SE) {
             TriangulateConnection(dir, cell, e);
+        }
+
+        if (cell.IsUnderwater) {
+            TriangulateWater(dir, cell, center);
+        }
+    }
+
+    private void TriangulateWater(HexDirection dir, HexCell cell, Vector3 center) {
+        center.y = cell.WaterSurfaceY;
+        var c1 = center + HexMetrics.GetFirstSolidCorner(dir);
+        var c2 = center + HexMetrics.GetSecondSolidCorner(dir);
+        
+        water.AddTriangle(center, c1, c2);
+
+        if (dir <= HexDirection.SE) {
+            var neighbor = cell.GetNeighbor(dir);
+            if (neighbor == null || !neighbor.IsUnderwater) {
+                return;
+            }
+
+            var bridge = HexMetrics.GetBridge(dir);
+            var e1 = c1 + bridge;
+            var e2 = c2 + bridge;
+            
+            water.AddQuad(c1, c2, e1, e2);
+
+            if (dir <= HexDirection.E) {
+                var nextNeighbor = cell.GetNeighbor(dir.Next());
+                if (nextNeighbor == null || !nextNeighbor.IsUnderwater) {
+                    return;
+                }
+                
+                water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(dir.Next()));
+            }
         }
     }
 

@@ -3971,7 +3971,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1681057778}
         m_MethodName: SetApplyWaterLevel
-        m_Mode: 6
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
