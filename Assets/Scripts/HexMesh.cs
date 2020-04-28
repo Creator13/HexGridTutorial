@@ -7,12 +7,12 @@ public class HexMesh : MonoBehaviour {
     private Mesh hexMesh;
     private MeshCollider meshCollider;
 
-    [SerializeField] private bool useCollider, useColors, useUVCoordinates;
+    [SerializeField] private bool useCollider, useColors, useUVCoordinates, useUV2Coordinates;
 
     [NonSerialized] private List<Vector3> vertices;
     [NonSerialized] private List<Color> colors;
     [NonSerialized] private List<int> triangles;
-    [NonSerialized] private List<Vector2> uvs;
+    [NonSerialized] private List<Vector2> uvs, uvs2;
 
     private void Awake() {
         GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
@@ -25,6 +25,7 @@ public class HexMesh : MonoBehaviour {
         vertices = ListPool<Vector3>.Get();
         if (useColors) colors = ListPool<Color>.Get();
         if (useUVCoordinates) uvs = ListPool<Vector2>.Get();
+        if (useUVCoordinates) uvs2 = ListPool<Vector2>.Get();
         triangles = ListPool<int>.Get();
     }
 
@@ -40,6 +41,11 @@ public class HexMesh : MonoBehaviour {
         if (useUVCoordinates) {
             hexMesh.SetUVs(0, uvs);
             ListPool<Vector2>.Add(uvs);
+        }
+        
+        if (useUV2Coordinates) {
+            hexMesh.SetUVs(1, uvs2);
+            ListPool<Vector2>.Add(uvs2);
         }
 
         hexMesh.SetTriangles(triangles, 0);
@@ -150,5 +156,25 @@ public class HexMesh : MonoBehaviour {
         uvs.Add(new Vector2(uMax, vMin));
         uvs.Add(new Vector2(uMin, vMax));
         uvs.Add(new Vector2(uMax, vMax));
+    }
+    
+    public void AddTriangleUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3) {
+        uvs2.Add(uv1);
+        uvs2.Add(uv2);
+        uvs2.Add(uv3);
+    }
+
+    public void AddQuadUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4) {
+        uvs2.Add(uv1);
+        uvs2.Add(uv2);
+        uvs2.Add(uv3);
+        uvs2.Add(uv4);
+    }
+
+    public void AddQuadUV2(float uMin, float uMax, float vMin, float vMax) {
+        uvs2.Add(new Vector2(uMin, vMin));
+        uvs2.Add(new Vector2(uMax, vMin));
+        uvs2.Add(new Vector2(uMin, vMax));
+        uvs2.Add(new Vector2(uMax, vMax));
     }
 }
