@@ -16,8 +16,12 @@ public class HexFeatureManager : MonoBehaviour {
     public void Apply() { }
 
     public void AddFeature(Vector3 pos) {
+        var hash = HexMetrics.SampleHashGrid(pos);
+        if (hash.a > .5f) return;
+        
         var instance = Instantiate(featurePrefab, container, false);
         pos.y += instance.localScale.y * .5f;
         instance.localPosition = HexMetrics.Perturb(pos);
+        instance.localRotation = Quaternion.Euler(0, 360f * hash.b, 0);
     }
 }

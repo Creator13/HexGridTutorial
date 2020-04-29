@@ -5,6 +5,10 @@ public enum HexEdgeType {
 }
 
 public static class HexMetrics {
+    public const int hashGridSize = 256;
+    public const float hashGridScale = .25f;
+    private static HexHash[] hashGrid;
+    
     public const float outerToInner = .866025404f;
     public const float innerToOuter = 1f / outerToInner;
     
@@ -120,5 +124,26 @@ public static class HexMetrics {
         pos.x += (sample.x * 2f - 1f) * cellPerturbStrength;
         pos.z += (sample.z * 2f - 1f) * cellPerturbStrength;
         return pos;
+    }
+
+    public static void InitializeHashGrid(int seed) {
+        hashGrid = new HexHash[hashGridSize * hashGridSize];
+
+        var currentState = Random.state;
+        
+        Random.InitState(seed);
+        for (var i = 0; i < hashGrid.Length; i++) {
+            hashGrid[i] = HexHash.Create();
+        }
+
+        Random.state = currentState;
+    }
+
+    public static HexHash SampleHashGrid(Vector3 pos) {
+        var x = (int) (pos.x * hashGridScale) % hashGridSize;
+        if (x < 0) x += hashGridSize; 
+        var z = (int) (pos.z * hashGridScale) % hashGridSize;
+        if (z < 0) z += hashGridSize; 
+        return hashGrid[x + z * hashGridSize];
     }
 }
