@@ -62,7 +62,10 @@ public class HexGridChunk : MonoBehaviour {
         for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
             Triangulate(d, cell);
         }
-        features.AddFeature(cell.Position);
+
+        if (!cell.IsUnderwater && !cell.HasRiver && !cell.HasRoads) {
+            features.AddFeature(cell.Position);
+        }
     }
 
     private void Triangulate(HexDirection dir, HexCell cell) {
@@ -88,6 +91,10 @@ public class HexGridChunk : MonoBehaviour {
         }
         else {
             TriangulateWithoutRiver(dir, cell, center, e);
+
+            if (!cell.IsUnderwater && !cell.HasRoadThroughEdge(dir)) {
+                features.AddFeature((center + e.v1 + e.v5) * (1f / 3));
+            }
         }
 
         if (dir <= HexDirection.SE) {
@@ -502,6 +509,10 @@ public class HexGridChunk : MonoBehaviour {
 
         TriangulateEdgeStrip(m, cell.Color, e, cell.Color);
         TriangulateEdgeFan(center, m, cell.Color);
+
+        if (!cell.IsUnderwater && !cell.HasRoadThroughEdge(dir)) {
+            features.AddFeature((center + e.v1 + e.v5) * (1f / 3));
+        }
     }
 
     private void TriangulateWaterfallInWater(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, float y1, float y2, float waterY) {
