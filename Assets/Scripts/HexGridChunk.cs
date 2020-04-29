@@ -243,9 +243,9 @@ public class HexGridChunk : MonoBehaviour {
         }
         else {
             estuaries.AddQuadUV2(
-                new Vector2(-0.5f, -0.2f), 
+                new Vector2(-0.5f, -0.2f),
                 new Vector2(0.3f, -0.35f),
-                new Vector2(0f, 0f), 
+                new Vector2(0f, 0f),
                 new Vector2(0.5f, -0.3f)
             );
             estuaries.AddTriangleUV2(
@@ -254,7 +254,7 @@ public class HexGridChunk : MonoBehaviour {
                 new Vector2(1f, 0f)
             );
             estuaries.AddQuadUV2(
-                new Vector2(0.5f, -0.3f), 
+                new Vector2(0.5f, -0.3f),
                 new Vector2(0.7f, -0.35f),
                 new Vector2(1f, 0f),
                 new Vector2(1.5f, -0.2f)
@@ -539,15 +539,15 @@ public class HexGridChunk : MonoBehaviour {
                         cell.HasIncomingRiver && cell.IncomingRiver == dir
                     );
                 }
-                else if (cell.Elevation > neighbor.Elevation) {
+                else if (cell.Elevation > neighbor.WaterLevel) {
                     TriangulateWaterfallInWater(e1.v2, e1.v4, e2.v2, e2.v4,
                         cell.RiverSurfaceY, neighbor.RiverSurfaceY, neighbor.WaterSurfaceY);
                 }
             }
-        }
-        else if (!neighbor.IsUnderwater && neighbor.Elevation > cell.WaterLevel) {
-            TriangulateWaterfallInWater(e2.v4, e2.v2, e1.v4, e1.v2,
-                neighbor.RiverSurfaceY, cell.RiverSurfaceY, cell.WaterSurfaceY);
+            else if (!neighbor.IsUnderwater && neighbor.Elevation > cell.WaterLevel) {
+                TriangulateWaterfallInWater(e2.v4, e2.v2, e1.v4, e1.v2,
+                    neighbor.RiverSurfaceY, cell.RiverSurfaceY, cell.WaterSurfaceY);
+            }
         }
 
         // Create cell edge
