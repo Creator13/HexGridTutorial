@@ -79,6 +79,18 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    private int urbanLevel;
+
+    public int UrbanLevel {
+        get => urbanLevel;
+        set {
+            if (urbanLevel != value) {
+                urbanLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
     public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
     public float RiverSurfaceY => (elevation + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
