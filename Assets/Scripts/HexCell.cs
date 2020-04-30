@@ -79,6 +79,18 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    private bool walled;
+
+    public bool Walled {
+        get => walled;
+        set {
+            if (walled != value) {
+                walled = value;
+                Refresh();
+            }
+        }
+    }
+
 
     #region Features
 

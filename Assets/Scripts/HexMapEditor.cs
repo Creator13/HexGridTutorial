@@ -12,7 +12,7 @@ public class HexMapEditor : MonoBehaviour {
     private int activeUrbanLevel, activeFarmLevel, activePlantLevel;
     private Color activeColor;
     private int brushSize;
-    private OptionalToggle riverMode, roadMode;
+    private OptionalToggle riverMode, roadMode, walledMode;
 
     private bool applyColor;
     private bool applyElevation;
@@ -111,6 +111,10 @@ public class HexMapEditor : MonoBehaviour {
                 cell.PlantLevel = activePlantLevel;
             }
 
+            if (walledMode != OptionalToggle.Ignore) {
+                cell.Walled = walledMode == OptionalToggle.Yes;
+            }
+            
             if (riverMode == OptionalToggle.No) {
                 cell.RemoveRiver();
             }
@@ -195,5 +199,9 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetRoadMode(int mode) {
         roadMode = (OptionalToggle) mode;
+    }
+
+    public void SetWalledMode(int mode) {
+        walledMode = (OptionalToggle) mode;
     }
 }
