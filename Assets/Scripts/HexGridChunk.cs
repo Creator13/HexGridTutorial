@@ -546,7 +546,10 @@ public class HexGridChunk : MonoBehaviour {
         bridge.y = neighbor.Position.y - cell.Position.y;
         var e2 = new EdgeVertices(e1.v1 + bridge, e1.v5 + bridge);
 
-        if (cell.HasRiverThroughEdge(dir)) {
+        var hasRiver = cell.HasRiverThroughEdge(dir);
+        var hasRoad = cell.HasRoadThroughEdge(dir);
+        
+        if (hasRiver) {
             e2.v3.y = neighbor.StreamBedY;
 
             if (!cell.IsUnderwater) {
@@ -569,13 +572,13 @@ public class HexGridChunk : MonoBehaviour {
 
         // Create cell edge
         if (cell.GetEdgeType(dir) == HexEdgeType.Slope) {
-            TriangulateEdgeTerraces(e1, cell, e2, neighbor, cell.HasRoadThroughEdge(dir));
+            TriangulateEdgeTerraces(e1, cell, e2, neighbor, hasRoad);
         }
         else {
-            TriangulateEdgeStrip(e1, cell.Color, e2, neighbor.Color, cell.HasRoadThroughEdge(dir));
+            TriangulateEdgeStrip(e1, cell.Color, e2, neighbor.Color, hasRoad);
         }
 
-        features.AddWall(e1, cell, e2, neighbor);
+        features.AddWall(e1, cell, e2, neighbor, hasRiver, hasRoad);
 
         // Create corner triangle
         var nextNeighbor = cell.GetNeighbor(dir.Next());
