@@ -534,7 +534,7 @@ public class HexGridChunk : MonoBehaviour {
     #endregion
 
 
-    #region Elevation
+    #region Grid
 
     private void TriangulateConnection(HexDirection dir, HexCell cell, EdgeVertices e1) {
         var neighbor = cell.GetNeighbor(dir);
@@ -574,6 +574,8 @@ public class HexGridChunk : MonoBehaviour {
         else {
             TriangulateEdgeStrip(e1, cell.Color, e2, neighbor.Color, cell.HasRoadThroughEdge(dir));
         }
+
+        features.AddWall(e1, cell, e2, neighbor);
 
         // Create corner triangle
         var nextNeighbor = cell.GetNeighbor(dir.Next());
@@ -635,7 +637,14 @@ public class HexGridChunk : MonoBehaviour {
             terrain.AddTriangle(bottom, left, right);
             terrain.AddTriangleColor(bottomCell.Color, leftCell.Color, rightCell.Color);
         }
+        
+        features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
     }
+
+    #endregion
+
+
+    #region Elevation
 
     private void TriangulateCornerTerraces(Vector3 begin, HexCell beginCell, Vector3 left, HexCell leftCell,
         Vector3 right, HexCell rightCell) {

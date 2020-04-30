@@ -18,7 +18,7 @@ public static class HexMetrics {
     public const float outerToInner = .866025404f;
     public const float innerToOuter = 1f / outerToInner;
     
-    public const float outerRadius = 10f;
+    public const float outerRadius = 10;
     public const float innerRadius = outerRadius * outerToInner;
 
     public const float solidFactor = .8f;
@@ -26,7 +26,7 @@ public static class HexMetrics {
     public const float waterFactor = .6f;
     public const float waterBlendFactor = 1 - waterFactor;
 
-    public const float elevationStep = 3f;
+    public const float elevationStep = 3;
 
     public const int terracesPerSlope = 2;
     public const int terraceSteps = terracesPerSlope * 2 + 1;
@@ -36,13 +36,16 @@ public static class HexMetrics {
 
     public static Texture2D noiseSource;
 
-    public const float cellPerturbStrength = 4f;
+    public const float cellPerturbStrength = 4;
     public const float noiseScale = 0.003f;
     public const float elevationPerturbStrength = 1.5f;
 
     public const float streamBedElevationOffset = -1.75f;
 
     public const float waterElevationOffset = -.5f;
+
+    public const float wallHeight = 3;
+    public const float wallThickness = .75f;
 
     public const int chunkSizeX = 5, chunkSizeZ = 5;
 
@@ -155,5 +158,13 @@ public static class HexMetrics {
 
     public static float[] GetFeatureThresholds(int level) {
         return featureThresholds[level];
+    }
+
+    public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far) {
+        Vector3 offset;
+        offset.x = far.x - near.x;
+        offset.y = 0;
+        offset.z = far.z - near.z;
+        return offset.normalized * (wallThickness * .5f);
     }
 }
