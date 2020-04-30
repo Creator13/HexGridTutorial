@@ -79,7 +79,10 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    private int urbanLevel;
+
+    #region Features
+
+    private int urbanLevel, farmLevel, plantLevel;
 
     public int UrbanLevel {
         get => urbanLevel;
@@ -90,6 +93,29 @@ public class HexCell : MonoBehaviour {
             }
         }
     }
+
+    public int FarmLevel {
+        get => farmLevel;
+        set {
+            if (farmLevel != value) {
+                farmLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
+    public int PlantLevel {
+        get => plantLevel;
+        set {
+            if (plantLevel != value) {
+                plantLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+    }
+
+    #endregion
+
 
     public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
