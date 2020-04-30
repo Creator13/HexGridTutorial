@@ -8,6 +8,12 @@ public static class HexMetrics {
     public const int hashGridSize = 256;
     public const float hashGridScale = .25f;
     private static HexHash[] hashGrid;
+
+    private static float[][] featureThresholds = {
+        new[] {0.0f, 0.0f, 0.4f},
+        new[] {0.0f, 0.4f, 0.6f},
+        new[] {0.4f, 0.6f, 0.8f}
+    };
     
     public const float outerToInner = .866025404f;
     public const float innerToOuter = 1f / outerToInner;
@@ -145,5 +151,9 @@ public static class HexMetrics {
         var z = (int) (pos.z * hashGridScale) % hashGridSize;
         if (z < 0) z += hashGridSize; 
         return hashGrid[x + z * hashGridSize];
+    }
+
+    public static float[] GetFeatureThresholds(int level) {
+        return featureThresholds[level];
     }
 }
