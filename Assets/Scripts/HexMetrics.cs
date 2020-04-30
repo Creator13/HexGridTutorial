@@ -44,9 +44,11 @@ public static class HexMetrics {
 
     public const float waterElevationOffset = -.5f;
 
-    public const float wallHeight = 3;
+    public const float wallHeight = 4;
     public const float wallThickness = .75f;
     public const float wallElevationOffset = verticalTerraceStepSize;
+    public const float wallYOffset = -1;
+    public const float wallTowerThreshold = .5f;
 
     public const int chunkSizeX = 5, chunkSizeZ = 5;
 
@@ -173,7 +175,7 @@ public static class HexMetrics {
         near.x += (far.x - near.x) * .5f;
         near.z += (far.z - near.z) * .5f;
         var v = near.y < far.y ? wallElevationOffset : 1 - wallElevationOffset;
-        near.y += (far.y - near.y) * v;
+        near.y += (far.y - near.y) * v + wallYOffset;
         return near;
     }
 }

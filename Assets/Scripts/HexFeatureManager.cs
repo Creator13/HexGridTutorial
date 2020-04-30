@@ -4,6 +4,7 @@ using UnityEngine.Serialization;
 public class HexFeatureManager : MonoBehaviour {
     public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
     public HexMesh walls;
+    public Transform wallTower;
 
     private Transform container;
 
@@ -125,7 +126,7 @@ public class HexFeatureManager : MonoBehaviour {
         }
     }
 
-    private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight) {
+    private void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight, bool addTower = false) {
         nearLeft = HexMetrics.Perturb(nearLeft);
         nearRight = HexMetrics.Perturb(nearRight);
         farLeft = HexMetrics.Perturb(farLeft);
@@ -156,6 +157,14 @@ public class HexFeatureManager : MonoBehaviour {
         walls.AddQuadUnperturbed(v2, v1, v4, v3);
 
         walls.AddQuadUnperturbed(t1, t2, v3, v4);
+
+        if (addTower) {
+            var tower = Instantiate(wallTower, container, false);
+            tower.transform.localPosition = (left + right) * .5f;
+            var rightDir = right - left;
+            rightDir.y = 0;
+            tower.transform.right = rightDir;
+        }
     }
 
     private void AddWallSegment(Vector3 pivot, HexCell pivotCell, Vector3 left, HexCell leftCell, Vector3 right, HexCell rightCell) {
@@ -163,9 +172,11 @@ public class HexFeatureManager : MonoBehaviour {
 
         var hasLeftWall = !leftCell.IsUnderwater && pivotCell.GetEdgeType(leftCell) != HexEdgeType.Cliff;
         var hasRightWall = !rightCell.IsUnderwater && pivotCell.GetEdgeType(rightCell) != HexEdgeType.Cliff;
-        
+
         if (hasLeftWall && hasRightWall) {
-            AddWallSegment(pivot, left, pivot, right);
+            var hash = HexMetrics.SampleHashGrid((pivot + left + right) * (1f / 3f));
+            var hasTower = hash.e < HexMetrics.wallTowerThreshold && leftCell.Elevation == rightCell.Elevation;
+            AddWallSegment(pivot, left, pivot, right, hasTower);
         }
         else {
             if (hasLeftWall) {
@@ -200,7 +211,7 @@ public class HexFeatureManager : MonoBehaviour {
         v3.y = v4.y = center.y + HexMetrics.wallHeight;
         walls.AddQuadUnperturbed(v1, v2, v3, v4);
     }
-    
+
     private void AddWallWedge(Vector3 near, Vector3 far, Vector3 point) {
         near = HexMetrics.Perturb(near);
         far = HexMetrics.Perturb(far);
@@ -212,11 +223,11 @@ public class HexFeatureManager : MonoBehaviour {
         Vector3 v1, v2, v3, v4;
         var pointTop = point;
         point.y = center.y;
-        
+
         v1 = v3 = center - thickness;
         v2 = v4 = center + thickness;
         v3.y = v4.y = pointTop.y = center.y + HexMetrics.wallHeight;
-        
+
         walls.AddQuadUnperturbed(v1, point, v3, pointTop);
         walls.AddQuadUnperturbed(point, v2, pointTop, v4);
         walls.AddTriangleUnperturbed(pointTop, v3, v4);
