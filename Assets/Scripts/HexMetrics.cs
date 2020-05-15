@@ -9,6 +9,8 @@ public static class HexMetrics {
     public const float hashGridScale = .25f;
     private static HexHash[] hashGrid;
 
+    public const int chunkSizeX = 5, chunkSizeZ = 5;
+
     private static float[][] featureThresholds = {
         new[] {0.0f, 0.0f, 0.4f},
         new[] {0.0f, 0.4f, 0.6f},
@@ -50,7 +52,7 @@ public static class HexMetrics {
     public const float wallYOffset = -1;
     public const float wallTowerThreshold = .5f;
 
-    public const int chunkSizeX = 5, chunkSizeZ = 5;
+    public const float bridgeDesignLength = 7f;
 
     private static readonly Vector3[] corners = {
         new Vector3(0, 0, outerRadius),

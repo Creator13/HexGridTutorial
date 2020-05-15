@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 public class HexFeatureManager : MonoBehaviour {
     public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
     public HexMesh walls;
-    public Transform wallTower;
+    public Transform wallTower, bridge;
 
     private Transform container;
 
@@ -231,6 +231,22 @@ public class HexFeatureManager : MonoBehaviour {
         walls.AddQuadUnperturbed(v1, point, v3, pointTop);
         walls.AddQuadUnperturbed(point, v2, pointTop, v4);
         walls.AddTriangleUnperturbed(pointTop, v3, v4);
+    }
+
+    #endregion
+
+
+    #region Bridges
+
+    public void AddBridge(Vector3 roadCenter1, Vector3 roadCenter2) {
+        roadCenter1 = HexMetrics.Perturb(roadCenter1);
+        roadCenter2 = HexMetrics.Perturb(roadCenter2);
+
+        var instance = Instantiate(bridge, container, false);
+        instance.forward = roadCenter2 - roadCenter1;
+        instance.localPosition = (roadCenter1 + roadCenter2) * .5f;
+        var length = Vector3.Distance(roadCenter1, roadCenter2);
+        instance.localScale = new Vector3(1, 1, length * (1 / HexMetrics.bridgeDesignLength));
     }
 
     #endregion

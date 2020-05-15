@@ -345,6 +345,11 @@ public class HexGridChunk : MonoBehaviour {
             }
 
             roadCenter += corner * .5f;
+            if (cell.IncomingRiver == dir.Next() &&
+                (cell.HasRoadThroughEdge(dir.Next2()) || cell.HasRoadThroughEdge(dir.Opposite()))) {
+                features.AddBridge(roadCenter, center - corner * .5f);
+            }
+
             center += corner * .25f;
         }
         else if (cell.IncomingRiver == cell.OutgoingRiver.Previous()) {
@@ -378,7 +383,11 @@ public class HexGridChunk : MonoBehaviour {
                 return;
             }
 
-            roadCenter += HexMetrics.GetSolidEdgeMiddle(middle) * .25f;
+            var offset = HexMetrics.GetSolidEdgeMiddle(middle);
+            roadCenter += offset * .25f;
+            if (dir == middle && cell.HasRoadThroughEdge(dir.Opposite())) {
+                features.AddBridge(roadCenter, center - offset * (HexMetrics.innerToOuter * .7f));
+            }
         }
 
         var mL = Vector3.Lerp(roadCenter, e.v1, interpolators.x);
@@ -548,7 +557,7 @@ public class HexGridChunk : MonoBehaviour {
 
         var hasRiver = cell.HasRiverThroughEdge(dir);
         var hasRoad = cell.HasRoadThroughEdge(dir);
-        
+
         if (hasRiver) {
             e2.v3.y = neighbor.StreamBedY;
 
@@ -640,7 +649,7 @@ public class HexGridChunk : MonoBehaviour {
             terrain.AddTriangle(bottom, left, right);
             terrain.AddTriangleColor(bottomCell.Color, leftCell.Color, rightCell.Color);
         }
-        
+
         features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
     }
 
