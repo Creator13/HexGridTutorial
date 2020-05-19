@@ -1,6 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 public class HexMapCamera : MonoBehaviour {
+    private static HexMapCamera instance;
+
+    public static bool Locked {
+        set => instance.enabled = !value;
+    }
+
     [SerializeField] private float stickMinZoom, stickMaxZoom;
     [SerializeField] private float swivelMinZoom, swivelMaxZoom;
     [SerializeField] private float moveSpeedMinZoom, moveSpeedMaxZoom;
@@ -12,12 +19,15 @@ public class HexMapCamera : MonoBehaviour {
 
     private float zoom = 1f;
     private float rotationAngle;
-
+    
     private void Awake() {
+        instance = this;
+        
         swivel = transform.GetChild(0);
         stick = swivel.GetChild(0);
     }
 
+    [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
     private void Update() {
         var zoomDelta = Input.GetAxis("Mouse ScrollWheel");
         if (zoomDelta != 0) {
@@ -70,12 +80,16 @@ public class HexMapCamera : MonoBehaviour {
     }
 
     private Vector3 ClampPosition(Vector3 pos) {
-        var xMax = (grid.chunkCountX * HexMetrics.chunkSizeX - 0.5f) * (2f * HexMetrics.innerRadius);
+        var xMax = (grid.cellCountX - 0.5f) * (2f * HexMetrics.innerRadius);
         pos.x = Mathf.Clamp(pos.x, 0, xMax);
 
-        var zMax = (grid.chunkCountZ * HexMetrics.chunkSizeZ - 1) * (1.5f * HexMetrics.outerRadius);
+        var zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
         pos.z = Mathf.Clamp(pos.z, 0, zMax);
 
         return pos;
+    }
+
+    public static void ValidatePosition() {
+        instance.AdjustPosition(0, 0);
     }
 }
