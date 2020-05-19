@@ -5,6 +5,7 @@ public class HexFeatureManager : MonoBehaviour {
     public HexFeatureCollection[] urbanCollections, farmCollections, plantCollections;
     public HexMesh walls;
     public Transform wallTower, bridge;
+    public Transform[] special;
 
     private Transform container;
 
@@ -27,6 +28,8 @@ public class HexFeatureManager : MonoBehaviour {
     #region Features
 
     public void AddFeature(HexCell cell, Vector3 pos) {
+        if (cell.IsSpecial) return;
+        
         var hash = HexMetrics.SampleHashGrid(pos);
 
         var prefab = PickPrefab(urbanCollections, cell.UrbanLevel, hash.a, hash.d);
@@ -247,6 +250,18 @@ public class HexFeatureManager : MonoBehaviour {
         instance.localPosition = (roadCenter1 + roadCenter2) * .5f;
         var length = Vector3.Distance(roadCenter1, roadCenter2);
         instance.localScale = new Vector3(1, 1, length * (1 / HexMetrics.bridgeDesignLength));
+    }
+
+    #endregion
+
+
+    #region Specials
+
+    public void AddSpecialFeature(HexCell cell, Vector3 position) {
+        var instance = Instantiate(special[cell.SpecialIndex - 1], container, false);
+        instance.localPosition = HexMetrics.Perturb(position);
+        var hash = HexMetrics.SampleHashGrid(position);
+        instance.localRotation = Quaternion.Euler(0, 360 * hash.e, 0);
     }
 
     #endregion

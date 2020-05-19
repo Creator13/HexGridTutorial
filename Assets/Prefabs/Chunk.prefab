@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 1230877747389565505}
   - component: {fileID: 8637424805678440612}
   m_Layer: 0
-  m_Name: Hex Grid Chunk
+  m_Name: Chunk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -618,6 +618,10 @@ MonoBehaviour:
   wallTower: {fileID: 6971430251278420885, guid: f4617da95891de74da48c8c98724586f,
     type: 3}
   bridge: {fileID: 5751386145964092646, guid: 4437ebafd4add16429432453248c9301, type: 3}
+  special:
+  - {fileID: 6796643530810366739, guid: 60b41c836d093da498835eea4c5a0d28, type: 3}
+  - {fileID: 915235004697214427, guid: ca9c77bf91a91874c8fdedfb918fa169, type: 3}
+  - {fileID: 6014570603314024996, guid: cec2c9032a85e8e43b1aa904387d277a, type: 3}
 --- !u!1 &8586702132234263354
 GameObject:
   m_ObjectHideFlags: 0

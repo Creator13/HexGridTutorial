@@ -125,6 +125,21 @@ public class HexCell : MonoBehaviour {
             }
         }
     }
+    
+    public bool IsSpecial => specialIndex > 0;
+    
+    private int specialIndex;
+
+    public int SpecialIndex {
+        get => specialIndex;
+        set {
+            if (specialIndex != value && !HasRiver) {
+                specialIndex = value;
+                RemoveRoads();
+                RefreshSelfOnly();
+            }
+        }
+    }
 
     #endregion
 
@@ -222,10 +237,12 @@ public class HexCell : MonoBehaviour {
 
         hasOutgoingRiver = true;
         outgoingRiver = dir;
+        specialIndex = 0;
 
         neighbor.RemoveIncomingRiver();
         neighbor.hasIncomingRiver = true;
         neighbor.incomingRiver = dir.Opposite();
+        neighbor.specialIndex = 0;
 
         // Also refreshes both cells
         SetRoad((int) dir, false);
@@ -251,7 +268,8 @@ public class HexCell : MonoBehaviour {
     }
 
     public void AddRoad(HexDirection dir) {
-        if (!roads[(int) dir] && !HasRiverThroughEdge(dir) && GetElevationDifference(dir) <= 1) {
+        if (!roads[(int) dir] && !HasRiverThroughEdge(dir) && !IsSpecial 
+            && !GetNeighbor(dir).IsSpecial && GetElevationDifference(dir) <= 1) {
             SetRoad((int) dir, true);
         }
     }
