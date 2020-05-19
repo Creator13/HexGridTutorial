@@ -33,12 +33,12 @@ public class HexGrid : MonoBehaviour {
         }
     }
 
-    public void CreateMap(int x, int z) {
+    public bool CreateMap(int x, int z) {
         if (x <= 0 || x % HexMetrics.chunkSizeX != 0 || z <= 0 || z % HexMetrics.chunkSizeZ != 0) {
             Debug.LogError("Unsupported Map Size");
-            return;
+            return false;
         }
-        
+
         // Destroy existing chunks
         if (chunks != null) {
             foreach (var chunk in chunks) {
@@ -54,6 +54,8 @@ public class HexGrid : MonoBehaviour {
 
         CreateChunks();
         CreateCells();
+
+        return true;
     }
 
     public HexCell GetCell(Vector3 position) {
@@ -158,14 +160,29 @@ public class HexGrid : MonoBehaviour {
     #region Saving
 
     public void Save(BinaryWriter writer) {
-        for (var i = 0; i < cells.Length; i++) {
-            cells[i].Save(writer);
+        writer.Write(cellCountX);
+        writer.Write(cellCountZ);
+
+        foreach (var t in cells) {
+            t.Save(writer);
         }
     }
 
-    public void Load(BinaryReader reader) {
-        for (var i = 0; i < cells.Length; i++) {
-            cells[i].Load(reader);
+    public void Load(BinaryReader reader, int header) {
+        int x = 20, z = 15;
+        if (header >= 1) {
+            x = reader.ReadInt32();
+            z = reader.ReadInt32();
+        }
+
+        if (!(x == cellCountX && z == cellCountZ)) {
+            if (!CreateMap(x, z)) {
+                return;
+            }
+        }
+
+        foreach (var t in cells) {
+            t.Load(reader);
         }
 
         foreach (var chunk in chunks) {

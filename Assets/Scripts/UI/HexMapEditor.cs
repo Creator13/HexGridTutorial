@@ -212,7 +212,7 @@ public class HexMapEditor : MonoBehaviour {
     public void Save() {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
-            writer.Write(0);
+            writer.Write(1);
             hexGrid.Save(writer);
         }
     }
@@ -221,8 +221,9 @@ public class HexMapEditor : MonoBehaviour {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var reader = new BinaryReader(File.OpenRead(path))) {
             var header = reader.ReadInt32();
-            if (header == 0) {
-                hexGrid.Load(reader);
+            if (header <= 1) {
+                hexGrid.Load(reader, header);
+                HexMapCamera.ValidatePosition();
             }
             else {
                 Debug.LogWarning("Unknown map format " + header);
