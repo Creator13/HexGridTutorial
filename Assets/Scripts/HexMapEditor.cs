@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class HexMapEditor : MonoBehaviour {
@@ -209,10 +210,17 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     public void Save() {
-        
+        var path = Path.Combine(Application.persistentDataPath, "test.map");
+        using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
+            writer.Write(123);
+        }
     }
 
     public void Load() {
+        var path = Path.Combine(Application.persistentDataPath, "test.map");
+        using (var reader = new BinaryReader(File.OpenRead(path))) {
+            Debug.Log(reader.ReadInt32());
+        }
         
     }
 }
