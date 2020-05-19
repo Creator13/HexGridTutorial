@@ -85,7 +85,7 @@ public class HexMapEditor : MonoBehaviour {
             if (activeTerrainTypeIndex >= 0) {
                 cell.TerrainTypeIndex = activeTerrainTypeIndex;
             }
-            
+
             if (applyElevation) {
                 cell.Elevation = activeElevation;
             }
@@ -113,7 +113,7 @@ public class HexMapEditor : MonoBehaviour {
             if (walledMode != OptionalToggle.Ignore) {
                 cell.Walled = walledMode == OptionalToggle.Yes;
             }
-            
+
             if (riverMode == OptionalToggle.No) {
                 cell.RemoveRiver();
             }
@@ -212,15 +212,21 @@ public class HexMapEditor : MonoBehaviour {
     public void Save() {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
-            writer.Write(123);
+            writer.Write(0);
+            hexGrid.Save(writer);
         }
     }
 
     public void Load() {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var reader = new BinaryReader(File.OpenRead(path))) {
-            Debug.Log(reader.ReadInt32());
+            var header = reader.ReadInt32();
+            if (header == 0) {
+                hexGrid.Load(reader);
+            }
+            else {
+                Debug.LogWarning("Unknown map format " + header);
+            }
         }
-        
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class HexGrid : MonoBehaviour {
@@ -135,4 +136,25 @@ public class HexGrid : MonoBehaviour {
         var localZ = z - chunkZ * HexMetrics.chunkSizeZ;
         chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
+
+
+    #region Saving
+
+    public void Save(BinaryWriter writer) {
+        for (var i = 0; i < cells.Length; i++) {
+            cells[i].Save(writer);
+        }
+    }
+
+    public void Load(BinaryReader reader) {
+        for (var i = 0; i < cells.Length; i++) {
+            cells[i].Load(reader);
+        }
+
+        foreach (var chunk in chunks) {
+            chunk.Refresh();
+        }
+    }
+
+    #endregion
 }
