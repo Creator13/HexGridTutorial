@@ -4,17 +4,15 @@ using UnityEngine.EventSystems;
 public class HexMapEditor : MonoBehaviour {
     private enum OptionalToggle { Ignore, Yes, No }
 
-    [SerializeField] private Color[] colors;
     [SerializeField] private HexGrid hexGrid;
 
     private int activeElevation;
     private int activeWaterLevel;
+    private int activeTerrainTypeIndex;
     private int activeUrbanLevel, activeFarmLevel, activePlantLevel, activeSpecialIndex;
-    private Color activeColor;
     private int brushSize;
     private OptionalToggle riverMode, roadMode, walledMode;
 
-    private bool applyColor;
     private bool applyElevation;
     private bool applyWaterLevel;
     private bool applyUrbanLevel, applyFarmLevel, applyPlantLevel, applySpecialIndex;
@@ -22,10 +20,6 @@ public class HexMapEditor : MonoBehaviour {
     private bool isDrag;
     private HexDirection dragDir;
     private HexCell previousCell;
-
-    private void Awake() {
-        SelectColor(0);
-    }
 
     private void Update() {
         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -87,10 +81,10 @@ public class HexMapEditor : MonoBehaviour {
 
     private void EditCell(HexCell cell) {
         if (cell) {
-            if (applyColor) {
-                cell.Color = activeColor;
+            if (activeTerrainTypeIndex >= 0) {
+                cell.TerrainTypeIndex = activeTerrainTypeIndex;
             }
-
+            
             if (applyElevation) {
                 cell.Elevation = activeElevation;
             }
@@ -142,13 +136,6 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
-    public void SelectColor(int i) {
-        applyColor = i >= 0;
-        if (applyColor) {
-            activeColor = colors[i];
-        }
-    }
-
     public void SetElevation(float elevation) {
         activeElevation = (int) elevation;
     }
@@ -197,6 +184,10 @@ public class HexMapEditor : MonoBehaviour {
         activeSpecialIndex = (int) index;
     }
 
+    public void SetTerrainTypeIndex(int index) {
+        activeTerrainTypeIndex = index;
+    }
+
     public void SetBrushSize(float size) {
         brushSize = (int) size;
     }
@@ -215,5 +206,13 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetWalledMode(int mode) {
         walledMode = (OptionalToggle) mode;
+    }
+
+    public void Save() {
+        
+    }
+
+    public void Load() {
+        
     }
 }

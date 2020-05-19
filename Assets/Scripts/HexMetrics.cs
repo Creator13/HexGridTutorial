@@ -16,6 +16,8 @@ public static class HexMetrics {
         new[] {0.0f, 0.4f, 0.6f},
         new[] {0.4f, 0.6f, 0.8f}
     };
+
+    public static Color[] colors;
     
     public const float outerToInner = .866025404f;
     public const float innerToOuter = 1f / outerToInner;

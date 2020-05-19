@@ -67,17 +67,20 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    private Color color;
+    // private Color color;
+    private int terrainTypeIndex;
 
-    public Color Color {
-        get => color;
+    public int TerrainTypeIndex {
+        get => terrainTypeIndex;
         set {
-            if (color == value) return;
-
-            color = value;
-            Refresh();
+            if (terrainTypeIndex != value) {
+                terrainTypeIndex = value;
+                Refresh();
+            }
         }
     }
+
+    public Color Color => HexMetrics.colors[terrainTypeIndex];
 
     private bool walled;
 
@@ -125,9 +128,9 @@ public class HexCell : MonoBehaviour {
             }
         }
     }
-    
+
     public bool IsSpecial => specialIndex > 0;
-    
+
     private int specialIndex;
 
     public int SpecialIndex {
@@ -268,7 +271,7 @@ public class HexCell : MonoBehaviour {
     }
 
     public void AddRoad(HexDirection dir) {
-        if (!roads[(int) dir] && !HasRiverThroughEdge(dir) && !IsSpecial 
+        if (!roads[(int) dir] && !HasRiverThroughEdge(dir) && !IsSpecial
             && !GetNeighbor(dir).IsSpecial && GetElevationDifference(dir) <= 1) {
             SetRoad((int) dir, true);
         }
