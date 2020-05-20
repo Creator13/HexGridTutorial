@@ -207,9 +207,7 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetWalledMode(int mode) {
         walledMode = (OptionalToggle) mode;
-    }
-
-    public void Save() {
+    }    public void Save() {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
             writer.Write(1);
