@@ -32,6 +32,4 @@ public class TextureArrayWizard : ScriptableWizard {
         
         AssetDatabase.CreateAsset(textureArray, path);
     }
-
-    public void OnWizardUpdate() { }
 }

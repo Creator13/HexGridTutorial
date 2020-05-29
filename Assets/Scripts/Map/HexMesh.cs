@@ -7,9 +7,9 @@ public class HexMesh : MonoBehaviour {
     private Mesh hexMesh;
     private MeshCollider meshCollider;
 
-    [SerializeField] private bool useCollider, useColors, useUVCoordinates, useUV2Coordinates;
+    [SerializeField] private bool useCollider, useColors, useUVCoordinates, useUV2Coordinates, useTerrainTypes;
 
-    [NonSerialized] private List<Vector3> vertices;
+    [NonSerialized] private List<Vector3> vertices, terrainTypes;
     [NonSerialized] private List<Color> colors;
     [NonSerialized] private List<int> triangles;
     [NonSerialized] private List<Vector2> uvs, uvs2;
@@ -26,6 +26,7 @@ public class HexMesh : MonoBehaviour {
         if (useColors) colors = ListPool<Color>.Get();
         if (useUVCoordinates) uvs = ListPool<Vector2>.Get();
         if (useUVCoordinates) uvs2 = ListPool<Vector2>.Get();
+        if (useTerrainTypes) terrainTypes = ListPool<Vector3>.Get();
         triangles = ListPool<int>.Get();
     }
 
@@ -42,10 +43,15 @@ public class HexMesh : MonoBehaviour {
             hexMesh.SetUVs(0, uvs);
             ListPool<Vector2>.Add(uvs);
         }
-        
+
         if (useUV2Coordinates) {
             hexMesh.SetUVs(1, uvs2);
             ListPool<Vector2>.Add(uvs2);
+        }
+
+        if (useTerrainTypes) {
+            hexMesh.SetUVs(2, terrainTypes);
+            ListPool<Vector3>.Add(terrainTypes);
         }
 
         hexMesh.SetTriangles(triangles, 0);
@@ -102,7 +108,7 @@ public class HexMesh : MonoBehaviour {
         triangles.Add(vertexIndex + 2);
         triangles.Add(vertexIndex + 3);
     }
-    
+
     public void AddQuadUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4) {
         var vertexIndex = vertices.Count;
         vertices.Add(v1);
@@ -157,7 +163,7 @@ public class HexMesh : MonoBehaviour {
         uvs.Add(new Vector2(uMin, vMax));
         uvs.Add(new Vector2(uMax, vMax));
     }
-    
+
     public void AddTriangleUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3) {
         uvs2.Add(uv1);
         uvs2.Add(uv2);
@@ -176,5 +182,18 @@ public class HexMesh : MonoBehaviour {
         uvs2.Add(new Vector2(uMax, vMin));
         uvs2.Add(new Vector2(uMin, vMax));
         uvs2.Add(new Vector2(uMax, vMax));
+    }
+
+    public void AddTriangleTerrainTypes(Vector3 types) {
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+    }
+    
+    public void AddQuadTerrainTypes(Vector3 types) {
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
     }
 }
