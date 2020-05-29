@@ -74,8 +74,6 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    public Color Color => HexMetrics.colors[terrainTypeIndex];
-
     private bool walled;
 
     public bool Walled {

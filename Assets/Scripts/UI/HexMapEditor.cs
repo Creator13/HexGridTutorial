@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -6,6 +7,7 @@ public class HexMapEditor : MonoBehaviour {
     private enum OptionalToggle { Ignore, Yes, No }
 
     [SerializeField] private HexGrid hexGrid;
+    [SerializeField] private Material terrainMaterial;
 
     private int activeElevation;
     private int activeWaterLevel;
@@ -21,6 +23,10 @@ public class HexMapEditor : MonoBehaviour {
     private bool isDrag;
     private HexDirection dragDir;
     private HexCell previousCell;
+
+    private void Awake() {
+        ShowGrid(false);
+    }
 
     private void Update() {
         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
@@ -207,7 +213,18 @@ public class HexMapEditor : MonoBehaviour {
 
     public void SetWalledMode(int mode) {
         walledMode = (OptionalToggle) mode;
-    }    public void Save() {
+    }
+
+    public void ShowGrid(bool isVisible) {
+        if (isVisible) {
+            terrainMaterial.EnableKeyword("GRID_ON");
+        }
+        else {
+            terrainMaterial.DisableKeyword("GRID_ON");
+        }
+    }
+
+    public void Save() {
         var path = Path.Combine(Application.persistentDataPath, "test.map");
         using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
             writer.Write(1);
