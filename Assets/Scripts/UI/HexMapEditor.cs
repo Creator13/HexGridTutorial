@@ -24,6 +24,8 @@ public class HexMapEditor : MonoBehaviour {
     private HexDirection dragDir;
     private HexCell previousCell;
 
+    private bool editMode;
+
     private void Awake() {
         ShowGrid(false);
     }
@@ -35,6 +37,11 @@ public class HexMapEditor : MonoBehaviour {
         else {
             previousCell = null;
         }
+    }
+
+    public void SetEditMode(bool toggle) {
+        editMode = toggle;
+        hexGrid.ShowUI(!toggle);
     }
 
     private void HandleInput() {
@@ -50,7 +57,10 @@ public class HexMapEditor : MonoBehaviour {
                 isDrag = false;
             }
 
-            EditCells(currentCell);
+            if (editMode) {
+                EditCells(currentCell);
+            }
+
             previousCell = currentCell;
         }
         else {
@@ -199,10 +209,6 @@ public class HexMapEditor : MonoBehaviour {
         brushSize = (int) size;
     }
 
-    public void ShowUI(bool visible) {
-        hexGrid.ShowUI(visible);
-    }
-
     public void SetRiverMode(int mode) {
         riverMode = (OptionalToggle) mode;
     }
@@ -221,28 +227,6 @@ public class HexMapEditor : MonoBehaviour {
         }
         else {
             terrainMaterial.DisableKeyword("GRID_ON");
-        }
-    }
-
-    public void Save() {
-        var path = Path.Combine(Application.persistentDataPath, "test.map");
-        using (var writer = new BinaryWriter(File.Open(path, FileMode.Create))) {
-            writer.Write(1);
-            hexGrid.Save(writer);
-        }
-    }
-
-    public void Load() {
-        var path = Path.Combine(Application.persistentDataPath, "test.map");
-        using (var reader = new BinaryReader(File.OpenRead(path))) {
-            var header = reader.ReadInt32();
-            if (header <= 1) {
-                hexGrid.Load(reader, header);
-                HexMapCamera.ValidatePosition();
-            }
-            else {
-                Debug.LogWarning("Unknown map format " + header);
-            }
         }
     }
 }
