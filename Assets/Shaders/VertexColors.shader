@@ -1,7 +1,7 @@
-﻿Shader "Custom/VertexColors" {
+﻿Shader "Custom/Terrain" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
-		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+		_MainTex ("Terrain texture array", 2DArray) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
@@ -11,13 +11,13 @@
 		
 		CGPROGRAM
 		#pragma surface surf Standard fullforwardshadows
-		#pragma target 3.0
+		#pragma target 3.5
 
-		sampler2D _MainTex;
+		UNITY_DECLARE_TEX2DARRAY(_MainTex);
 
 		struct Input {
-			float2 uv_MainTex;
 			float4 color : COLOR;
+			float3 worldPos;
 		};
 
 		half _Glossiness;
@@ -25,8 +25,9 @@
 		fixed4 _Color;
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-			o.Albedo = c.rgb * IN.color;
+			float2 uv = IN.worldPos.xz * 0.02;
+			fixed4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, float3(uv, 0));
+			o.Albedo = c.rgb * _Color;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
