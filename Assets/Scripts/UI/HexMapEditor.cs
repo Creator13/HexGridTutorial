@@ -60,6 +60,9 @@ public class HexMapEditor : MonoBehaviour {
             if (editMode) {
                 EditCells(currentCell);
             }
+            else {
+                hexGrid.FindDistancesTo(currentCell);
+            }
 
             previousCell = currentCell;
         }

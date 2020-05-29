@@ -2,18 +2,20 @@
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using UnityEngine.UI;
 
 public class HexCell : MonoBehaviour {
     public HexCoordinates coordinates;
     public RectTransform uiRect;
-
     public HexGridChunk chunk;
-    private bool hasIncomingRiver, hasOutgoingRiver;
-    private HexDirection incomingRiver, outgoingRiver;
 
     [SerializeField] private bool[] roads = new bool[6];
 
     [SerializeField] private HexCell[] neighbors = new HexCell[6];
+
+    private bool hasIncomingRiver, hasOutgoingRiver;
+    private HexDirection incomingRiver, outgoingRiver;
 
     public bool HasIncomingRiver => hasIncomingRiver;
     public bool HasOutgoingRiver => hasOutgoingRiver;
@@ -26,6 +28,10 @@ public class HexCell : MonoBehaviour {
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
     private int elevation = int.MinValue;
+    private int waterLevel;
+    private int terrainTypeIndex;
+    private bool walled;
+    private int distance;
 
     public int Elevation {
         get => elevation;
@@ -48,8 +54,6 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    private int waterLevel;
-
     public int WaterLevel {
         get => waterLevel;
         set {
@@ -61,9 +65,6 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    // private Color color;
-    private int terrainTypeIndex;
-
     public int TerrainTypeIndex {
         get => terrainTypeIndex;
         set {
@@ -73,8 +74,6 @@ public class HexCell : MonoBehaviour {
             }
         }
     }
-
-    private bool walled;
 
     public bool Walled {
         get => walled;
@@ -86,10 +85,18 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    public int Distance {
+        get => distance;
+        set {
+            distance = value;
+            UpdateDistanceLabel();
+        }
+    }
+
 
     #region Features
 
-    private int urbanLevel, farmLevel, plantLevel;
+    private int urbanLevel, farmLevel, plantLevel, specialIndex;
 
     public int UrbanLevel {
         get => urbanLevel;
@@ -121,10 +128,6 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    public bool IsSpecial => specialIndex > 0;
-
-    private int specialIndex;
-
     public int SpecialIndex {
         get => specialIndex;
         set {
@@ -135,6 +138,8 @@ public class HexCell : MonoBehaviour {
             }
         }
     }
+
+    public bool IsSpecial => specialIndex > 0;
 
     #endregion
 
@@ -197,6 +202,11 @@ public class HexCell : MonoBehaviour {
                 }
             }
         }
+    }
+
+    private void UpdateDistanceLabel() {
+        var label = uiRect.GetComponent<Text>();
+        label.text = distance.ToString();
     }
 
 

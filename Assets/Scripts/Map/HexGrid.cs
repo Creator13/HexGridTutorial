@@ -152,6 +152,12 @@ public class HexGrid : MonoBehaviour {
         chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
 
+    public void FindDistancesTo(HexCell cell) {
+        for (var i = 0; i < cells.Length; i++) {
+            cells[i].Distance = cell.coordinates.DistanceTo(cells[i].coordinates);
+        }
+    }
+
 
     #region Saving
 
