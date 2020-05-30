@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Mime;
 using UnityEngine;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 public class HexGrid : MonoBehaviour {
     public int cellCountX = 20, cellCountZ = 15;
@@ -158,11 +160,14 @@ public class HexGrid : MonoBehaviour {
     }
 
     public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
-        StopAllCoroutines();
-        StartCoroutine(Search(fromCell, toCell, speed));
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        Search(fromCell, toCell, speed);
+        stopwatch.Stop();
+        Debug.Log($"Path calculated in {stopwatch.ElapsedMilliseconds}ms");
     }
 
-    private IEnumerator Search(HexCell fromCell, HexCell toCell, int speed) {
+    private void Search(HexCell fromCell, HexCell toCell, int speed) {
         if (searchFrontier == null) {
             searchFrontier = new PriorityQueue<HexCell>();
         }
@@ -177,21 +182,20 @@ public class HexGrid : MonoBehaviour {
         }
 
         fromCell.EnableHighlight(Color.blue); 
-        toCell.EnableHighlight(Color.red);
 
-        var delay = new WaitForSeconds(1 / 60f);
         fromCell.Distance = 0;
         searchFrontier.Enqueue(fromCell);
         while (searchFrontier.Count > 0) {
-            yield return delay;
             var current = searchFrontier.Dequeue();
 
             if (current == toCell) {
-                current = current.PathFrom;
                 while (current != fromCell) {
+                    var turn = current.Distance / speed;
+                    current.SetLabel(turn.ToString());
                     current.EnableHighlight(Color.white);
                     current = current.PathFrom;
                 }
+                toCell.EnableHighlight(Color.red);
                 break;
             }
 
@@ -233,7 +237,6 @@ public class HexGrid : MonoBehaviour {
 
                 if (neighbor.Distance == int.MaxValue) {
                     neighbor.Distance = distance;
-                    neighbor.SetLabel(turn.ToString());
                     neighbor.PathFrom = current;
                     neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
                     searchFrontier.Enqueue(neighbor);
@@ -241,7 +244,6 @@ public class HexGrid : MonoBehaviour {
                 else if (distance < neighbor.Distance) {
                     var oldPriority = neighbor.Priority;
                     neighbor.Distance = distance;
-                    neighbor.SetLabel(turn.ToString());
                     neighbor.PathFrom = current;
                     searchFrontier.Change(neighbor, oldPriority);
                 }
@@ -262,8 +264,6 @@ public class HexGrid : MonoBehaviour {
     }
 
     public void Load(BinaryReader reader, int header) {
-        StopAllCoroutines();
-
         int x = 20, z = 15;
         if (header >= 1) {
             x = reader.ReadInt32();
