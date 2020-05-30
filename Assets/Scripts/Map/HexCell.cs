@@ -94,7 +94,6 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         get => distance;
         set {
             distance = value;
-            UpdateDistanceLabel();
         }
     }
 
@@ -209,9 +208,9 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         }
     }
 
-    private void UpdateDistanceLabel() {
+    public void SetLabel(string text) {
         var label = uiRect.GetComponent<Text>();
-        label.text = distance == int.MaxValue ? "" : distance.ToString();
+        label.text = text;
     }
 
     public void EnableHighlight(Color tint) {
