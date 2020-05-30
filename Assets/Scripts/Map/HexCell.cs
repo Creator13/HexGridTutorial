@@ -29,6 +29,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     
     public HexCell PathFrom { get; set; }
     public int SearchHeuristic { get; set; }
+    public int SearchPhase { get; set; }
     public int Priority => distance + SearchHeuristic;
     public IPriorityQueueItem NextWithSamePriority { get; set; }
 

@@ -23,6 +23,7 @@ public class HexGrid : MonoBehaviour {
     private HexGridChunk[] chunks;
 
     private PriorityQueue<HexCell> searchFrontier;
+    private int searchFrontierPhase;
 
     private void Awake() {
         HexMetrics.noiseSource = noiseSource;
@@ -168,6 +169,8 @@ public class HexGrid : MonoBehaviour {
     }
 
     private void Search(HexCell fromCell, HexCell toCell, int speed) {
+        searchFrontierPhase += 2;
+        
         if (searchFrontier == null) {
             searchFrontier = new PriorityQueue<HexCell>();
         }
@@ -176,17 +179,18 @@ public class HexGrid : MonoBehaviour {
         }
         
         foreach (var c in cells) {
-            c.Distance = int.MaxValue;
             c.SetLabel(null);
             c.DisableHighlight();
         }
 
-        fromCell.EnableHighlight(Color.blue); 
+        fromCell.EnableHighlight(Color.blue);
 
+        fromCell.SearchPhase = searchFrontierPhase;
         fromCell.Distance = 0;
         searchFrontier.Enqueue(fromCell);
         while (searchFrontier.Count > 0) {
             var current = searchFrontier.Dequeue();
+            current.SearchPhase += 1;
 
             if (current == toCell) {
                 while (current != fromCell) {
@@ -204,7 +208,7 @@ public class HexGrid : MonoBehaviour {
             for (var dir = HexDirection.NE; dir <= HexDirection.NW; dir++) {
                 var neighbor = current.GetNeighbor(dir);
 
-                if (neighbor == null) {
+                if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
                     continue;
                 }
 
@@ -235,7 +239,8 @@ public class HexGrid : MonoBehaviour {
                     distance = turn * speed + moveCost;
                 }
 
-                if (neighbor.Distance == int.MaxValue) {
+                if (neighbor.SearchPhase < searchFrontierPhase) {
+                    neighbor.SearchPhase = searchFrontierPhase;
                     neighbor.Distance = distance;
                     neighbor.PathFrom = current;
                     neighbor.SearchHeuristic = neighbor.coordinates.DistanceTo(toCell.coordinates);
