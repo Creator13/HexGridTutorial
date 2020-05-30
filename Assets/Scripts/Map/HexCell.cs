@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
-public class HexCell : MonoBehaviour {
+public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public HexCoordinates coordinates;
     public RectTransform uiRect;
     public HexGridChunk chunk;
@@ -28,6 +28,9 @@ public class HexCell : MonoBehaviour {
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
     
     public HexCell PathFrom { get; set; }
+    public int SearchHeuristic { get; set; }
+    public int Priority => distance + SearchHeuristic;
+    public IPriorityQueueItem NextWithSamePriority { get; set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
