@@ -26,6 +26,8 @@ public class HexCell : MonoBehaviour {
 
     public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+    
+    public HexCell PathFrom { get; set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
@@ -211,13 +213,13 @@ public class HexCell : MonoBehaviour {
 
     public void EnableHighlight(Color tint) {
         var highlight = uiRect.GetComponentInChildren<Image>();
-        highlight.enabled = false;
+        highlight.enabled = true;
         highlight.color = tint;
     }
     
     public void DisableHighlight() {
         var highlight = uiRect.GetComponentInChildren<Image>();
-        highlight.enabled = true;
+        highlight.enabled = false;
     }
     
 

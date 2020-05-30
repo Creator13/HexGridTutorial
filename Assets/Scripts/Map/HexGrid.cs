@@ -154,24 +154,38 @@ public class HexGrid : MonoBehaviour {
         chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
 
-    public void FindDistancesTo(HexCell cell) {
+    public void FindPath(HexCell fromCell, HexCell toCell) {
         StopAllCoroutines();
-        StartCoroutine(Search(cell));
+        StartCoroutine(Search(fromCell, toCell));
     }
 
-    private IEnumerator Search(HexCell cell) {
+    private IEnumerator Search(HexCell fromCell, HexCell toCell) {
         foreach (var c in cells) {
             c.Distance = int.MaxValue;
+            c.DisableHighlight();
         }
+
+        fromCell.EnableHighlight(Color.blue); 
+        toCell.EnableHighlight(Color.red);
 
         var delay = new WaitForSeconds(1 / 60f);
         var frontier = new List<HexCell>();
-        cell.Distance = 0;
-        frontier.Add(cell);
+        fromCell.Distance = 0;
+        frontier.Add(fromCell);
         while (frontier.Count > 0) {
             yield return delay;
             var current = frontier[0];
             frontier.RemoveAt(0);
+
+            if (current == toCell) {
+                current = current.PathFrom;
+                while (current != fromCell) {
+                    current.EnableHighlight(Color.white);
+                    current = current.PathFrom;
+                }
+                break;
+            }
+            
             for (var dir = HexDirection.NE; dir <= HexDirection.NW; dir++) {
                 var neighbor = current.GetNeighbor(dir);
 
@@ -202,10 +216,12 @@ public class HexGrid : MonoBehaviour {
 
                 if (neighbor.Distance == int.MaxValue) {
                     neighbor.Distance = distance;
+                    neighbor.PathFrom = current;
                     frontier.Add(neighbor);
                 }
                 else if (distance < neighbor.Distance) {
                     neighbor.Distance = distance;
+                    neighbor.PathFrom = current;
                 }
 
                 frontier.Sort((x, y) => x.Distance.CompareTo(y.Distance));
