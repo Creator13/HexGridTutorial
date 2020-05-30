@@ -209,6 +209,17 @@ public class HexCell : MonoBehaviour {
         label.text = distance == int.MaxValue ? "" : distance.ToString();
     }
 
+    public void EnableHighlight(Color tint) {
+        var highlight = uiRect.GetComponentInChildren<Image>();
+        highlight.enabled = false;
+        highlight.color = tint;
+    }
+    
+    public void DisableHighlight() {
+        var highlight = uiRect.GetComponentInChildren<Image>();
+        highlight.enabled = true;
+    }
+    
 
     #region Rivers
 
