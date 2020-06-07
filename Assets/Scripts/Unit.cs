@@ -1,6 +1,9 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 public class Unit : MonoBehaviour {
+    public static Unit unitPrefab;
+    
     public HexCell Location {
         get => location;
         set {
@@ -28,5 +31,16 @@ public class Unit : MonoBehaviour {
     public void Die() {
         location.Unit = null;
         Destroy(gameObject);
+    }
+
+    public void Save(BinaryWriter writer) {
+        location.coordinates.Save(writer);
+        writer.Write(orientation);
+    }
+
+    public static void Load(BinaryReader reader, HexGrid grid) {
+        var coordinates = HexCoordinates.Load(reader);
+        var orientation = reader.ReadSingle();
+        grid.AddUnit(Instantiate(unitPrefab), grid.GetCell(coordinates), orientation);
     }
 }

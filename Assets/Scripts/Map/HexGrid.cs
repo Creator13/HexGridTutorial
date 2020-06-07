@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Mime;
 using UnityEngine;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -18,6 +15,7 @@ public class HexGrid : MonoBehaviour {
 
     [SerializeField] private Texture2D noiseSource;
     public int seed;
+    [SerializeField] private Unit unitPrefab;
 
     private HexCell[] cells;
     private HexGridChunk[] chunks;
@@ -30,6 +28,7 @@ public class HexGrid : MonoBehaviour {
     private void Awake() {
         HexMetrics.noiseSource = noiseSource;
         HexMetrics.InitializeHashGrid(seed);
+        Unit.unitPrefab = unitPrefab;
         CreateMap(cellCountX, cellCountZ);
     }
 
@@ -37,6 +36,7 @@ public class HexGrid : MonoBehaviour {
         if (!HexMetrics.noiseSource) {
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
+            Unit.unitPrefab = unitPrefab;
         }
     }
 
@@ -47,7 +47,8 @@ public class HexGrid : MonoBehaviour {
         }
 
         ClearPath();
-        
+        ClearUnits();
+
         // Destroy existing chunks
         if (chunks != null) {
             foreach (var chunk in chunks) {
@@ -163,6 +164,36 @@ public class HexGrid : MonoBehaviour {
         var localZ = z - chunkZ * HexMetrics.chunkSizeZ;
         chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
+
+
+    #region Units
+
+    private List<Unit> units = new List<Unit>();
+
+    private void ClearUnits() {
+        foreach (var unit in units) {
+            unit.Die();
+        }
+
+        units.Clear();
+    }
+
+    public void AddUnit(Unit unit, HexCell location, float orientation) {
+        units.Add(unit);
+        unit.transform.SetParent(transform, false);
+        unit.Location = location;
+        unit.Orientation = orientation;
+    }
+
+    public void RemoveUnit(Unit unit) {
+        units.Remove(unit);
+        unit.Die();
+    }
+
+    #endregion
+
+
+    #region Pathfinding
 
     public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
         var stopwatch = new Stopwatch();
@@ -288,6 +319,8 @@ public class HexGrid : MonoBehaviour {
         return false;
     }
 
+    #endregion
+
 
     #region Saving
 
@@ -298,11 +331,17 @@ public class HexGrid : MonoBehaviour {
         foreach (var t in cells) {
             t.Save(writer);
         }
+
+        writer.Write(units.Count);
+        foreach (var unit in units) {
+            unit.Save(writer);
+        }
     }
 
     public void Load(BinaryReader reader, int header) {
         ClearPath();
-        
+        ClearUnits();
+
         int x = 20, z = 15;
         if (header >= 1) {
             x = reader.ReadInt32();
@@ -321,6 +360,13 @@ public class HexGrid : MonoBehaviour {
 
         foreach (var chunk in chunks) {
             chunk.Refresh();
+        }
+
+        if (header >= 2) {
+            var unitCount = reader.ReadInt32();
+            for (var i = 0; i < unitCount; i++) {
+                Unit.Load(reader, this);
+            }
         }
     }
 

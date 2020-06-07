@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 [System.Serializable]
 public struct HexCoordinates {
@@ -49,6 +50,18 @@ public struct HexCoordinates {
         return ((X < other.X ? other.X - X : X - other.X) +
                 (Y < other.Y ? other.Y - Y : Y - other.Y) +
                 (Z < other.Z ? other.Z - Z : Z - other.Z)) / 2;
+    }
+
+    public void Save(BinaryWriter writer) {
+        writer.Write(x);
+        writer.Write(z);
+    }
+
+    public static HexCoordinates Load(BinaryReader reader) {
+        return new HexCoordinates {
+            x = reader.ReadInt32(),
+            z = reader.ReadInt32()
+        };
     }
 
     public override string ToString() {

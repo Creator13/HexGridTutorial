@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using Random = UnityEngine.Random;
 
@@ -9,7 +7,6 @@ public class HexMapEditor : MonoBehaviour {
 
     [SerializeField] private HexGrid hexGrid;
     [SerializeField] private Material terrainMaterial;
-    [SerializeField] private Unit unitPrefab;
 
     private int activeElevation;
     private int activeWaterLevel;
@@ -273,16 +270,14 @@ public class HexMapEditor : MonoBehaviour {
     private void CreateUnit() {
         var cell = GetCellUnderCursor();
         if (cell && !cell.Unit) {
-            var unit = Instantiate(unitPrefab, hexGrid.transform, false);
-            unit.Location = cell;
-            unit.Orientation = Random.Range(0, 360f);
+            hexGrid.AddUnit(Instantiate(Unit.unitPrefab), cell, Random.Range(0, 360));
         }
     }
 
     private void DestroyUnit() {
         var cell = GetCellUnderCursor();
         if (cell && cell.Unit) {
-            cell.Unit.Die();
+            hexGrid.RemoveUnit(cell.Unit);
         }
     }
 }
