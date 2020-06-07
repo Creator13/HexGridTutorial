@@ -26,7 +26,7 @@ public class HexGrid : MonoBehaviour {
     private bool currentPathExists;
 
     public bool HasPath => currentPathExists;
-    
+
     private void Awake() {
         HexMetrics.noiseSource = noiseSource;
         HexMetrics.InitializeHashGrid(seed);
@@ -242,7 +242,7 @@ public class HexGrid : MonoBehaviour {
         if (currentPathExists) {
             var current = currentPathTo;
             while (current != currentPathFrom) {
-                var turn = current.Distance / speed;
+                var turn = (current.Distance - 1) / speed;
                 current.SetLabel(turn.ToString());
                 current.EnableHighlight(Color.white);
                 current = current.PathFrom;
@@ -251,6 +251,22 @@ public class HexGrid : MonoBehaviour {
 
         currentPathFrom.EnableHighlight(Color.blue);
         currentPathTo.EnableHighlight(Color.red);
+    }
+
+    public List<HexCell> GetPath() {
+        if (!currentPathExists) {
+            return null;
+        }
+
+        var path = ListPool<HexCell>.Get();
+        for (var c = currentPathTo; c != currentPathFrom; c = c.PathFrom) {
+            path.Add(c);
+        }
+
+        path.Add(currentPathFrom);
+        path.Reverse();
+
+        return path;
     }
 
     private bool Search(HexCell fromCell, HexCell toCell, int speed) {
@@ -274,7 +290,7 @@ public class HexGrid : MonoBehaviour {
                 return true;
             }
 
-            var currentTurn = current.Distance / speed;
+            var currentTurn = (current.Distance - 1) / speed;
 
             for (var dir = HexDirection.NE; dir <= HexDirection.NW; dir++) {
                 var neighbor = current.GetNeighbor(dir);
@@ -305,7 +321,7 @@ public class HexGrid : MonoBehaviour {
                 }
 
                 var distance = current.Distance + moveCost;
-                var turn = distance / speed;
+                var turn = (distance - 1) / speed;
                 if (turn > currentTurn) {
                     distance = turn * speed + moveCost;
                 }
