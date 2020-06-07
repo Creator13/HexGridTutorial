@@ -2,12 +2,14 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Random = UnityEngine.Random;
 
 public class HexMapEditor : MonoBehaviour {
     private enum OptionalToggle { Ignore, Yes, No }
 
     [SerializeField] private HexGrid hexGrid;
     [SerializeField] private Material terrainMaterial;
+    [SerializeField] private Unit unitPrefab;
 
     private int activeElevation;
     private int activeWaterLevel;
@@ -31,12 +33,24 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject()) {
-            HandleInput();
+        if (!EventSystem.current.IsPointerOverGameObject()) {
+            if (Input.GetMouseButton(0)) {
+                HandleInput();
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.U)) {
+                if (Input.GetKeyDown(KeyCode.LeftShift)) {
+                    DestroyUnit();
+                }
+                else {
+                    CreateUnit();
+                }
+                return;
+            }
         }
-        else {
-            previousCell = null;
-        }
+
+        previousCell = null;
     }
 
     public void SetEditMode(bool toggle) {
@@ -44,12 +58,19 @@ public class HexMapEditor : MonoBehaviour {
         hexGrid.ShowUI(!toggle);
     }
 
-    private void HandleInput() {
+    private HexCell GetCellUnderCursor() {
         var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
         if (Physics.Raycast(inputRay, out var hit)) {
-            var currentCell = hexGrid.GetCell(hit.point);
+            return hexGrid.GetCell(hit.point);
+        }
 
+        return null;
+    }
+
+    private void HandleInput() {
+        var currentCell = GetCellUnderCursor();
+
+        if (currentCell) {
             if (previousCell && currentCell != previousCell) {
                 ValidateDrag(currentCell);
             }
@@ -246,6 +267,22 @@ public class HexMapEditor : MonoBehaviour {
         }
         else {
             terrainMaterial.DisableKeyword("GRID_ON");
+        }
+    }
+
+    private void CreateUnit() {
+        var cell = GetCellUnderCursor();
+        if (cell && !cell.Unit) {
+            var unit = Instantiate(unitPrefab, hexGrid.transform, false);
+            unit.Location = cell;
+            unit.Orientation = Random.Range(0, 360f);
+        }
+    }
+
+    private void DestroyUnit() {
+        var cell = GetCellUnderCursor();
+        if (cell && cell.Unit) {
+            cell.Unit.Die();
         }
     }
 }

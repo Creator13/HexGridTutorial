@@ -26,12 +26,14 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
     public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
-    
+
     public HexCell PathFrom { get; set; }
     public int SearchHeuristic { get; set; }
     public int SearchPhase { get; set; }
     public int Priority => distance + SearchHeuristic;
     public IPriorityQueueItem NextWithSamePriority { get; set; }
+
+    public Unit Unit { get; set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
@@ -93,9 +95,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public int Distance {
         get => distance;
-        set {
-            distance = value;
-        }
+        set { distance = value; }
     }
 
 
@@ -196,6 +196,10 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     private void RefreshSelfOnly() {
         chunk.Refresh();
+
+        if (Unit) {
+            Unit.ValidateLocation();
+        }
     }
 
     private void Refresh() {
@@ -205,6 +209,10 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
                 if (neighbor != null && neighbor.chunk != chunk) {
                     neighbor.chunk.Refresh();
                 }
+            }
+
+            if (Unit) {
+                Unit.ValidateLocation();
             }
         }
     }
@@ -219,12 +227,12 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         highlight.enabled = true;
         highlight.color = tint;
     }
-    
+
     public void DisableHighlight() {
         var highlight = uiRect.GetComponentInChildren<Image>();
         highlight.enabled = false;
     }
-    
+
 
     #region Rivers
 
