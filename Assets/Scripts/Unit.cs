@@ -56,14 +56,30 @@ public class Unit : MonoBehaviour {
     }
 
     private IEnumerator TravelPath() {
+        Vector3 a, b, c = pathToTravel[0].Position;
+
+        var t = Time.deltaTime * travelSpeed;
         for (var i = 1; i < pathToTravel.Count; i++) {
-            var a = pathToTravel[i - 1].Position;
-            var b = pathToTravel[i].Position;
-            for (float t = 0; t < 1f; t += Time.deltaTime * travelSpeed) {
-                transform.localPosition = Vector3.Lerp(a, b, t);
+            a = c;
+            b = pathToTravel[i - 1].Position;
+            c = (b + pathToTravel[i].Position) * .5f;
+            for (; t < 1f; t += Time.deltaTime * travelSpeed) {
+                transform.localPosition = Bezier.GetPoint(a, b, c, t);
                 yield return null;
             }
+
+            t -= 1;
         }
+
+        a = c;
+        b = pathToTravel[pathToTravel.Count - 1].Position;
+        c = b;
+        for (; t < 1f; t += Time.deltaTime * travelSpeed) {
+            transform.localPosition = Bezier.GetPoint(a, b, c, t);
+            yield return null;
+        }
+
+        transform.localPosition = location.Position;
     }
 
     private void OnEnable() {
@@ -92,12 +108,22 @@ public class Unit : MonoBehaviour {
     private void OnDrawGizmos() {
         if (pathToTravel == null || pathToTravel.Count == 0) return;
 
+        Vector3 a, b, c = pathToTravel[0].Position;
+        
         for (var i = 1; i < pathToTravel.Count; i++) {
-            var a = pathToTravel[i - 1].Position;
-            var b = pathToTravel[i].Position;
+            a = c;
+            b = pathToTravel[i - 1].Position;
+            c = (b + pathToTravel[i].Position) * .5f;
             for (float t = 0; t < 1f; t += .1f) {
-                Gizmos.DrawSphere(Vector3.Lerp(a, b, t), 2f);
+                Gizmos.DrawSphere(Bezier.GetPoint(a, b, c, t), 2f);
             }
+        }
+        
+        a = c;
+        b = pathToTravel[pathToTravel.Count - 1].Position;
+        c = b;
+        for (float t = 0; t < 1f; t += .1f) {
+            Gizmos.DrawSphere(Bezier.GetPoint(a, b, c, t), 2f);
         }
     }
 }
