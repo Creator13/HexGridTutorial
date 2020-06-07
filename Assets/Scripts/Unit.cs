@@ -7,6 +7,9 @@ public class Unit : MonoBehaviour {
     public HexCell Location {
         get => location;
         set {
+            if (location) {
+                location.Unit = null;
+            }
             location = value;
             value.Unit = this;
             transform.localPosition = value.Position;
@@ -31,6 +34,10 @@ public class Unit : MonoBehaviour {
     public void Die() {
         location.Unit = null;
         Destroy(gameObject);
+    }
+
+    public bool IsValidDestination(HexCell cell) {
+        return !cell.IsUnderwater && !cell.Unit;
     }
 
     public void Save(BinaryWriter writer) {

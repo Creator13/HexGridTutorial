@@ -25,6 +25,8 @@ public class HexGrid : MonoBehaviour {
     private HexCell currentPathFrom, currentPathTo;
     private bool currentPathExists;
 
+    public bool HasPath => currentPathExists;
+    
     private void Awake() {
         HexMetrics.noiseSource = noiseSource;
         HexMetrics.InitializeHashGrid(seed);
@@ -87,6 +89,14 @@ public class HexGrid : MonoBehaviour {
         }
 
         return cells[x + z * cellCountX];
+    }
+
+    public HexCell GetCell(Ray ray) {
+        if (Physics.Raycast(ray, out var hit)) {
+            return GetCell(hit.point);
+        }
+
+        return null;
     }
 
     public void ShowUI(bool visible) {
@@ -207,7 +217,7 @@ public class HexGrid : MonoBehaviour {
         Debug.Log($"Path calculated in {stopwatch.ElapsedMilliseconds}ms");
     }
 
-    private void ClearPath() {
+    public void ClearPath() {
         if (currentPathExists) {
             var current = currentPathTo;
             while (current != currentPathFrom) {
@@ -273,7 +283,7 @@ public class HexGrid : MonoBehaviour {
                     continue;
                 }
 
-                if (neighbor.IsUnderwater) {
+                if (neighbor.IsUnderwater || neighbor.Unit) {
                     continue;
                 }
 

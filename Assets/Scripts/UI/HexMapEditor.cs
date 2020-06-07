@@ -21,12 +21,11 @@ public class HexMapEditor : MonoBehaviour {
 
     private bool isDrag;
     private HexDirection dragDir;
-    private HexCell previousCell, searchFromCell, searchToCell;
-
-    private bool editMode;
+    private HexCell previousCell;
 
     private void Awake() {
         ShowGrid(false);
+        SetEditMode(false);
     }
 
     private void Update() {
@@ -36,13 +35,14 @@ public class HexMapEditor : MonoBehaviour {
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.U)) {
+            if (Input.GetKeyDown(KeyCode.C)) {
                 if (Input.GetKeyDown(KeyCode.LeftShift)) {
                     DestroyUnit();
                 }
                 else {
                     CreateUnit();
                 }
+
                 return;
             }
         }
@@ -51,17 +51,11 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     public void SetEditMode(bool toggle) {
-        editMode = toggle;
-        hexGrid.ShowUI(!toggle);
+        enabled = toggle;
     }
 
     private HexCell GetCellUnderCursor() {
-        var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(inputRay, out var hit)) {
-            return hexGrid.GetCell(hit.point);
-        }
-
-        return null;
+        return hexGrid.GetCell(Camera.main.ScreenPointToRay(Input.mousePosition));
     }
 
     private void HandleInput() {
@@ -75,28 +69,7 @@ public class HexMapEditor : MonoBehaviour {
                 isDrag = false;
             }
 
-            if (editMode) {
-                EditCells(currentCell);
-            }
-            else if (Input.GetKey(KeyCode.LeftShift) && searchToCell != currentCell) {
-                if (searchFromCell != currentCell) {
-                    if (searchFromCell) {
-                        searchFromCell.DisableHighlight();
-                    }
-
-                    searchFromCell = currentCell;
-                    searchFromCell.EnableHighlight(Color.blue);
-                    if (searchToCell) {
-                        hexGrid.FindPath(searchFromCell, searchToCell, 24);
-                    }
-                }
-            }
-            else if (searchFromCell && searchFromCell != currentCell) {
-                if (searchToCell != currentCell) {
-                    searchToCell = currentCell;
-                    hexGrid.FindPath(searchFromCell, currentCell, 24);
-                }
-            }
+            EditCells(currentCell);
 
             previousCell = currentCell;
         }
