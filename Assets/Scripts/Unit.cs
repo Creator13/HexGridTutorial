@@ -6,7 +6,8 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour {
     private const float travelSpeed = 4;
-    
+    private const float rotationSpeed = 180;
+
     public static Unit unitPrefab;
 
     private List<HexCell> pathToTravel;
@@ -57,6 +58,8 @@ public class Unit : MonoBehaviour {
 
     private IEnumerator TravelPath() {
         Vector3 a, b, c = pathToTravel[0].Position;
+        transform.localPosition = c;
+        yield return LookAt(pathToTravel[1].Position);
 
         var t = Time.deltaTime * travelSpeed;
         for (var i = 1; i < pathToTravel.Count; i++) {
@@ -65,6 +68,9 @@ public class Unit : MonoBehaviour {
             c = (b + pathToTravel[i].Position) * .5f;
             for (; t < 1f; t += Time.deltaTime * travelSpeed) {
                 transform.localPosition = Bezier.GetPoint(a, b, c, t);
+                var d = Bezier.GetDerivative(a, b, c, t);
+                d.y = 0;
+                transform.localRotation = Quaternion.LookRotation(d);
                 yield return null;
             }
 
@@ -76,10 +82,35 @@ public class Unit : MonoBehaviour {
         c = b;
         for (; t < 1f; t += Time.deltaTime * travelSpeed) {
             transform.localPosition = Bezier.GetPoint(a, b, c, t);
+            var d = Bezier.GetDerivative(a, b, c, t);
+            d.y = 0;
+            transform.localRotation = Quaternion.LookRotation(d);
             yield return null;
         }
 
         transform.localPosition = location.Position;
+        orientation = transform.localRotation.eulerAngles.y;
+
+        ListPool<HexCell>.Add(pathToTravel);
+        pathToTravel = null;
+    }
+
+    private IEnumerator LookAt(Vector3 point) {
+        point.y = transform.localPosition.y;
+        var fromRotation = transform.localRotation;
+        var toRotation = Quaternion.LookRotation(point - transform.localPosition);
+        var angle = Quaternion.Angle(fromRotation, toRotation);
+        var speed = rotationSpeed / angle;
+
+        if (angle > 0) {
+            for (var t = Time.deltaTime * speed; t < 1f; t += Time.deltaTime * speed) {
+                transform.localRotation = Quaternion.Slerp(fromRotation, toRotation, t);
+                yield return null;
+            }
+        }
+
+        transform.LookAt(point);
+        orientation = transform.localRotation.eulerAngles.y;
     }
 
     private void OnEnable() {
@@ -103,27 +134,4 @@ public class Unit : MonoBehaviour {
     }
 
     #endregion
-
-
-    private void OnDrawGizmos() {
-        if (pathToTravel == null || pathToTravel.Count == 0) return;
-
-        Vector3 a, b, c = pathToTravel[0].Position;
-        
-        for (var i = 1; i < pathToTravel.Count; i++) {
-            a = c;
-            b = pathToTravel[i - 1].Position;
-            c = (b + pathToTravel[i].Position) * .5f;
-            for (float t = 0; t < 1f; t += .1f) {
-                Gizmos.DrawSphere(Bezier.GetPoint(a, b, c, t), 2f);
-            }
-        }
-        
-        a = c;
-        b = pathToTravel[pathToTravel.Count - 1].Position;
-        c = b;
-        for (float t = 0; t < 1f; t += .1f) {
-            Gizmos.DrawSphere(Bezier.GetPoint(a, b, c, t), 2f);
-        }
-    }
 }
