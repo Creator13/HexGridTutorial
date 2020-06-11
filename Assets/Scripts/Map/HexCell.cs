@@ -33,6 +33,9 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public IPriorityQueueItem NextWithSamePriority { get; set; }
 
     public Unit Unit { get; set; }
+    
+    public HexCellShaderData ShaderData { get; set; }
+    public int Index { get; set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
@@ -77,7 +80,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         set {
             if (terrainTypeIndex != value) {
                 terrainTypeIndex = value;
-                Refresh();
+                ShaderData.RefreshTerrain(this);
             }
         }
     }
@@ -386,6 +389,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public void Load(BinaryReader reader) {
         terrainTypeIndex = reader.ReadSByte();
+        ShaderData.RefreshTerrain(this);
         elevation = reader.ReadSByte();
         RefreshPosition();
         waterLevel = reader.ReadByte();
