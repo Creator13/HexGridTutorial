@@ -21,6 +21,8 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public HexCellShaderData ShaderData { get; set; }
     public int Index { get; set; }
+    
+    public bool IsExplored { get; private set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
@@ -224,6 +226,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public void IncreaseVisibility() {
         visibility++;
         if (visibility == 1) {
+            IsExplored = true;
             ShaderData.RefreshVisibility(this);
         }
     }
@@ -407,9 +410,10 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         }
 
         writer.Write((byte) roadFlags);
+        writer.Write(IsExplored);
     }
 
-    public void Load(BinaryReader reader) {
+    public void Load(BinaryReader reader, int header) {
         terrainTypeIndex = reader.ReadSByte();
         ShaderData.RefreshTerrain(this);
         elevation = reader.ReadSByte();
@@ -444,6 +448,9 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         for (var i = 0; i < roads.Length; i++) {
             roads[i] = (roadFlags & (1 << i)) != 0;
         }
+
+        IsExplored = header >= 3 ? reader.ReadBoolean() : false;
+        ShaderData.RefreshTerrain(this);
     }
 
     #endregion

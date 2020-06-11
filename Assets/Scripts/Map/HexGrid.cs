@@ -460,7 +460,7 @@ public class HexGrid : MonoBehaviour {
         }
 
         foreach (var t in cells) {
-            t.Load(reader);
+            t.Load(reader, header);
         }
 
         foreach (var chunk in chunks) {
