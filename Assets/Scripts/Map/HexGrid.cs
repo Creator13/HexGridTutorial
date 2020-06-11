@@ -65,7 +65,7 @@ public class HexGrid : MonoBehaviour {
 
         chunkCountX = cellCountX / HexMetrics.chunkSizeX;
         chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
-        
+
         cellShaderData.Initialize(cellCountX, cellCountZ);
 
         CreateChunks();
@@ -196,6 +196,7 @@ public class HexGrid : MonoBehaviour {
 
     public void AddUnit(Unit unit, HexCell location, float orientation) {
         units.Add(unit);
+        unit.Grid = this;
         unit.transform.SetParent(transform, false);
         unit.Location = location;
         unit.Orientation = orientation;
@@ -349,6 +350,78 @@ public class HexGrid : MonoBehaviour {
         }
 
         return false;
+    }
+
+    #endregion
+
+
+    #region Visibility
+
+    private List<HexCell> GetVisibleCells(HexCell fromCell, int range) {
+        var visibleCells = ListPool<HexCell>.Get();
+
+        searchFrontierPhase += 2;
+
+        if (searchFrontier == null) {
+            searchFrontier = new PriorityQueue<HexCell>();
+        }
+        else {
+            searchFrontier.Clear();
+        }
+
+        fromCell.SearchPhase = searchFrontierPhase;
+        fromCell.Distance = 0;
+        searchFrontier.Enqueue(fromCell);
+        while (searchFrontier.Count > 0) {
+            var current = searchFrontier.Dequeue();
+            current.SearchPhase += 1;
+            visibleCells.Add(current);
+
+            for (var dir = HexDirection.NE; dir <= HexDirection.NW; dir++) {
+                var neighbor = current.GetNeighbor(dir);
+
+                if (neighbor == null || neighbor.SearchPhase > searchFrontierPhase) {
+                    continue;
+                }
+
+                var distance = current.Distance + 1;
+                if (distance > range) {
+                    continue;
+                }
+
+                if (neighbor.SearchPhase < searchFrontierPhase) {
+                    neighbor.SearchPhase = searchFrontierPhase;
+                    neighbor.Distance = distance;
+                    neighbor.SearchHeuristic = 0;
+                    searchFrontier.Enqueue(neighbor);
+                }
+                else if (distance < neighbor.Distance) {
+                    var oldPriority = neighbor.Priority;
+                    neighbor.Distance = distance;
+                    searchFrontier.Change(neighbor, oldPriority);
+                }
+            }
+        }
+
+        return visibleCells;
+    }
+
+    public void IncreaseVisibility(HexCell fromCell, int range) {
+        var cells = GetVisibleCells(fromCell, range);
+        foreach (var cell in cells) {
+            cell.IncreaseVisibility();
+        }
+
+        ListPool<HexCell>.Add(cells);
+    }
+
+    public void DecreaseVisibility(HexCell fromCell, int range) {
+        var cells = GetVisibleCells(fromCell, range);
+        foreach (var cell in cells) {
+            cell.DecreaseVisibility();
+        }
+
+        ListPool<HexCell>.Add(cells);
     }
 
     #endregion

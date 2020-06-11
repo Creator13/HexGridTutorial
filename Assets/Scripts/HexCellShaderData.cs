@@ -34,10 +34,14 @@ public class HexCellShaderData : MonoBehaviour {
         enabled = true;
     }
 
+    public void RefreshVisibility(HexCell cell) {
+        cellTextureData[cell.Index].r = cell.IsVisible ? (byte) 255 : (byte) 0;
+        enabled = true;
+    }
+
     public void LateUpdate() {
         cellTexture.SetPixels32(cellTextureData);
         cellTexture.Apply();
         enabled = true;
     }
 }
-

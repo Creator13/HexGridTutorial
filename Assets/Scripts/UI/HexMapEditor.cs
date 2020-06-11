@@ -36,7 +36,7 @@ public class HexMapEditor : MonoBehaviour {
             }
 
             if (Input.GetKeyDown(KeyCode.C)) {
-                if (Input.GetKeyDown(KeyCode.LeftShift)) {
+                if (Input.GetKey(KeyCode.LeftShift)) {
                     DestroyUnit();
                 }
                 else {

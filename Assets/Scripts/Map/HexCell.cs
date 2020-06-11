@@ -9,22 +9,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public RectTransform uiRect;
     public HexGridChunk chunk;
 
-    [SerializeField] private bool[] roads = new bool[6];
-
     [SerializeField] private HexCell[] neighbors = new HexCell[6];
-
-    private bool hasIncomingRiver, hasOutgoingRiver;
-    private HexDirection incomingRiver, outgoingRiver;
-
-    public bool HasIncomingRiver => hasIncomingRiver;
-    public bool HasOutgoingRiver => hasOutgoingRiver;
-
-    public HexDirection IncomingRiver => incomingRiver;
-    public HexDirection OutgoingRiver => outgoingRiver;
-    public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
-
-    public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
-    public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
     public HexCell PathFrom { get; set; }
     public int SearchHeuristic { get; set; }
@@ -33,7 +18,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public IPriorityQueueItem NextWithSamePriority { get; set; }
 
     public Unit Unit { get; set; }
-    
+
     public HexCellShaderData ShaderData { get; set; }
     public int Index { get; set; }
 
@@ -151,13 +136,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     #endregion
 
 
-    public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
-
-    public float RiverSurfaceY => (elevation + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
-
     public Vector3 Position => transform.localPosition;
-
-    public bool HasRoads => roads.Any(b => b);
 
     public bool IsUnderwater => WaterLevel > Elevation;
 
@@ -236,7 +215,46 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     }
 
 
+    #region Visibility
+
+    private int visibility;
+
+    public bool IsVisible => visibility > 0;
+
+    public void IncreaseVisibility() {
+        visibility++;
+        if (visibility == 1) {
+            ShaderData.RefreshVisibility(this);
+        }
+    }
+
+    public void DecreaseVisibility() {
+        visibility--;
+        if (visibility == 0) {
+            ShaderData.RefreshVisibility(this);
+        }
+    }
+
+    #endregion
+
+
     #region Rivers
+
+    private bool hasIncomingRiver, hasOutgoingRiver;
+    private HexDirection incomingRiver, outgoingRiver;
+
+    public bool HasIncomingRiver => hasIncomingRiver;
+    public bool HasOutgoingRiver => hasOutgoingRiver;
+
+    public HexDirection IncomingRiver => incomingRiver;
+    public HexDirection OutgoingRiver => outgoingRiver;
+    public HexDirection RiverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
+
+    public bool HasRiver => hasIncomingRiver || hasOutgoingRiver;
+    public bool HasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
+
+    public float StreamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+    public float RiverSurfaceY => (elevation + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
 
     public bool HasRiverThroughEdge(HexDirection dir) {
         return hasIncomingRiver && incomingRiver == dir || hasOutgoingRiver && outgoingRiver == dir;
@@ -319,6 +337,10 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
 
     #region Roads
+
+    [SerializeField] private bool[] roads = new bool[6];
+
+    public bool HasRoads => roads.Any(b => b);
 
     public bool HasRoadThroughEdge(HexDirection direction) {
         return roads[(int) direction];
