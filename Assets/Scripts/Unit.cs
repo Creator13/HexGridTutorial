@@ -15,6 +15,8 @@ public class Unit : MonoBehaviour {
 
     private HexCell location, currentTravelLocation;
     private float orientation;
+
+    public int Speed => 24;
     
     public HexGrid Grid { get; set; }
 
@@ -54,7 +56,28 @@ public class Unit : MonoBehaviour {
     }
 
     public bool IsValidDestination(HexCell cell) {
-        return !cell.IsUnderwater && !cell.Unit;
+        return cell.IsExplored && !cell.IsUnderwater && !cell.Unit;
+    }
+
+    public int GetMoveCost(HexCell fromCell, HexCell toCell, HexDirection dir) {
+        var edgeType = fromCell.GetEdgeType(toCell);
+        if (edgeType == HexEdgeType.Cliff) {
+            return -1;
+        }
+
+        int moveCost;
+        if (fromCell.HasRoadThroughEdge(dir)) {
+            moveCost = 1;
+        }
+        else if (fromCell.Walled != toCell.Walled) {
+            return -1;
+        }
+        else {
+            moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
+            moveCost += toCell.UrbanLevel + toCell.FarmLevel + toCell.PlantLevel;
+        }
+
+        return moveCost;
     }
 
     public void Travel(List<HexCell> path) {

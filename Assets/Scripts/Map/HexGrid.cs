@@ -212,14 +212,14 @@ public class HexGrid : MonoBehaviour {
 
     #region Pathfinding
 
-    public void FindPath(HexCell fromCell, HexCell toCell, int speed) {
+    public void FindPath(HexCell fromCell, HexCell toCell, Unit unit) {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
         ClearPath();
         currentPathFrom = fromCell;
         currentPathTo = toCell;
-        currentPathExists = Search(fromCell, toCell, speed);
-        ShowPath(speed);
+        currentPathExists = Search(fromCell, toCell, unit);
+        ShowPath(unit.Speed);
         stopwatch.Stop();
         Debug.Log($"Path calculated in {stopwatch.ElapsedMilliseconds}ms");
     }
@@ -276,7 +276,8 @@ public class HexGrid : MonoBehaviour {
         return path;
     }
 
-    private bool Search(HexCell fromCell, HexCell toCell, int speed) {
+    private bool Search(HexCell fromCell, HexCell toCell, Unit unit) {
+        int speed = unit.Speed;
         searchFrontierPhase += 2;
 
         if (searchFrontier == null) {
@@ -310,21 +311,13 @@ public class HexGrid : MonoBehaviour {
                     continue;
                 }
 
-                var edgeType = current.GetEdgeType(neighbor);
-                if (edgeType == HexEdgeType.Cliff) {
+                if (!unit.IsValidDestination(neighbor)) {
                     continue;
                 }
 
-                int moveCost;
-                if (current.HasRoadThroughEdge(dir)) {
-                    moveCost = 1;
-                }
-                else if (current.Walled != neighbor.Walled) {
+                var moveCost = unit.GetMoveCost(current, neighbor, dir);
+                if (moveCost < 0) {
                     continue;
-                }
-                else {
-                    moveCost = edgeType == HexEdgeType.Flat ? 5 : 10;
-                    moveCost += neighbor.UrbanLevel + neighbor.FarmLevel + neighbor.PlantLevel;
                 }
 
                 var distance = current.Distance + moveCost;
