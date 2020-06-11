@@ -4,14 +4,15 @@
 		_MainTex ("Terrain texture array", 2DArray) = "white" {}
 		_GridTex ("Grid texture", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
-		_Metallic ("Metallic", Range(0,1)) = 0.0
+		_Specular ("Specular", Color) = (.2, .2, .2)
+		_BackgroundColor("_BackgroundColor", Color) = (0, 0, 0)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
 		
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
+		#pragma surface surf StandardSpecular fullforwardshadows vertex:vert
 		#pragma target 3.5
 		
 		#pragma multi_compile _ GRID_ON
@@ -21,9 +22,10 @@
 
 		UNITY_DECLARE_TEX2DARRAY(_MainTex);
 		half _Glossiness;
-		half _Metallic;
+		fixed3 _Specular;
 		fixed4 _Color;
 		sampler2D _GridTex;
+		half3 _BackgroundColor;
 
 		struct Input {
 			float4 color : COLOR;
@@ -56,7 +58,7 @@
 			return c * (IN.color[index] * IN.visibility[index]);
 		}
 
-		void surf (Input IN, inout SurfaceOutputStandard o) {
+		void surf (Input IN, inout SurfaceOutputStandardSpecular o) {
 			fixed4 c = 
 				getTerrainColor(IN, 0) +
 				getTerrainColor(IN, 1) +
@@ -72,8 +74,10 @@
 			
 			float explored = IN.visibility.w;
 			o.Albedo = c.rgb * grid * _Color * explored;
-			o.Metallic = _Metallic;
+			o.Specular = _Specular * explored;
 			o.Smoothness = _Glossiness;
+			o.Occlusion = explored;
+			o.Emission = _BackgroundColor * (1 - explored);
 			o.Alpha = c.a;
 		}
 		ENDCG
