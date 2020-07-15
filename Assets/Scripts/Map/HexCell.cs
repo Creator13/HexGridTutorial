@@ -22,7 +22,13 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public HexCellShaderData ShaderData { get; set; }
     public int Index { get; set; }
 
-    public bool IsExplored { get; private set; }
+    private bool explored;
+    public bool IsExplored {
+        get => explored && Explorable;
+        private set => explored = value;
+    }
+
+    public bool Explorable { get; set; }
 
     private int elevation = int.MinValue;
     private int waterLevel;
@@ -234,7 +240,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     private int visibility;
 
-    public bool IsVisible => visibility > 0;
+    public bool IsVisible => visibility > 0 && Explorable;
 
     public void IncreaseVisibility() {
         visibility++;
