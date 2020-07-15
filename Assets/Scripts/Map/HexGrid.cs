@@ -452,8 +452,11 @@ public class HexGrid : MonoBehaviour {
             }
         }
 
-        foreach (var t in cells) {
-            t.Load(reader, header);
+        var originalImmediateMode = cellShaderData.ImmediateMode;
+        cellShaderData.ImmediateMode = true;
+        
+        foreach (var cell in cells) {
+            cell.Load(reader, header);
         }
 
         foreach (var chunk in chunks) {
@@ -466,6 +469,8 @@ public class HexGrid : MonoBehaviour {
                 Unit.Load(reader, this);
             }
         }
+
+        cellShaderData.ImmediateMode = originalImmediateMode;
     }
 
     #endregion
