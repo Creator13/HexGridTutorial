@@ -33,6 +33,7 @@ public class HexGrid : MonoBehaviour {
         HexMetrics.InitializeHashGrid(seed);
         Unit.unitPrefab = unitPrefab;
         cellShaderData = gameObject.AddComponent<HexCellShaderData>();
+        cellShaderData.Grid = this;
         CreateMap(cellCountX, cellCountZ);
     }
 
@@ -41,6 +42,7 @@ public class HexGrid : MonoBehaviour {
             HexMetrics.noiseSource = noiseSource;
             HexMetrics.InitializeHashGrid(seed);
             Unit.unitPrefab = unitPrefab;
+            ResetVisibility();
         }
     }
 
@@ -362,9 +364,11 @@ public class HexGrid : MonoBehaviour {
             searchFrontier.Clear();
         }
 
+        range += fromCell.ViewElevation;
         fromCell.SearchPhase = searchFrontierPhase;
         fromCell.Distance = 0;
         searchFrontier.Enqueue(fromCell);
+        var fromCoords = fromCell.coordinates;
         while (searchFrontier.Count > 0) {
             var current = searchFrontier.Dequeue();
             current.SearchPhase += 1;
@@ -378,7 +382,8 @@ public class HexGrid : MonoBehaviour {
                 }
 
                 var distance = current.Distance + 1;
-                if (distance > range) {
+                if (distance + neighbor.ViewElevation > range ||
+                    distance > fromCoords.DistanceTo(neighbor.coordinates)) {
                     continue;
                 }
 
@@ -415,6 +420,16 @@ public class HexGrid : MonoBehaviour {
         }
 
         ListPool<HexCell>.Add(cells);
+    }
+
+    public void ResetVisibility() {
+        foreach (var cell in cells) {
+            cell.ResetVisibility();
+        }
+
+        foreach (var unit in units) {
+            IncreaseVisibility(unit.Location, unit.VisionRange);
+        }
     }
 
     #endregion
@@ -454,7 +469,7 @@ public class HexGrid : MonoBehaviour {
 
         var originalImmediateMode = cellShaderData.ImmediateMode;
         cellShaderData.ImmediateMode = true;
-        
+
         foreach (var cell in cells) {
             cell.Load(reader, header);
         }

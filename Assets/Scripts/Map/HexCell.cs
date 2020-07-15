@@ -21,7 +21,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public HexCellShaderData ShaderData { get; set; }
     public int Index { get; set; }
-    
+
     public bool IsExplored { get; private set; }
 
     private int elevation = int.MinValue;
@@ -35,7 +35,12 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         set {
             if (elevation == value) return;
 
+            var originalViewElevation = ViewElevation;
             elevation = value;
+
+            if (ViewElevation != originalViewElevation) {
+                ShaderData.ViewElevationChanged();
+            }
 
             RefreshPosition();
 
@@ -56,7 +61,13 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         set {
             if (waterLevel == value) return;
 
+            var originalViewElevation = ViewElevation;
             waterLevel = value;
+
+            if (ViewElevation != originalViewElevation) {
+                ShaderData.ViewElevationChanged();
+            }
+
             ValidateRivers();
             Refresh();
         }
@@ -143,6 +154,8 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public bool IsUnderwater => WaterLevel > Elevation;
 
     public float WaterSurfaceY => (waterLevel + HexMetrics.waterElevationOffset) * HexMetrics.elevationStep;
+
+    public int ViewElevation => elevation >= waterLevel ? elevation : waterLevel;
 
     public HexCell GetNeighbor(HexDirection dir) {
         return neighbors[(int) dir];
@@ -234,6 +247,13 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
     public void DecreaseVisibility() {
         visibility--;
         if (visibility == 0) {
+            ShaderData.RefreshVisibility(this);
+        }
+    }
+
+    public void ResetVisibility() {
+        if (visibility > 0) {
+            visibility = 0;
             ShaderData.RefreshVisibility(this);
         }
     }
