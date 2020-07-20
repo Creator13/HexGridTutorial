@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class HexMapGenerator : MonoBehaviour {
     private struct MapRegion {
@@ -21,6 +23,7 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(0, 10)] private int mapBorderZ = 5;
     [SerializeField, Range(0, 10)] private int regionBorder = 5;
     [SerializeField, Range(1, 4)] private int regionCount = 1;
+    [SerializeField, Range(0, 100)] private int erosionPercentage = 50;
 
     public HexGrid grid;
 
@@ -55,6 +58,7 @@ public class HexMapGenerator : MonoBehaviour {
 
         CreateRegions();
         CreateLand();
+        ErodeLand();
         SetTerrainType();
 
         for (var i = 0; i < cellCount; i++) {
@@ -135,6 +139,9 @@ public class HexMapGenerator : MonoBehaviour {
                 break;
         }
     }
+
+
+    #region Creation
 
     private void CreateLand() {
         var landBudget = Mathf.RoundToInt(cellCount * landPercentage * .01f);
@@ -246,6 +253,87 @@ public class HexMapGenerator : MonoBehaviour {
         searchFrontier.Clear();
         return budget;
     }
+
+    #endregion
+
+
+    #region Erosion
+
+    private void ErodeLand() {
+        var erodibleCells = ListPool<HexCell>.Get();
+        for (var i = 0; i < cellCount; i++) {
+            var cell = grid.GetCell(i);
+            if (IsErodible(cell)) {
+                erodibleCells.Add(cell);
+            }
+        }
+
+        var targetErodibleCount = (int) (erodibleCells.Count * (100 - erosionPercentage) * .01f);
+
+        while (erodibleCells.Count > targetErodibleCount) {
+            var index = Random.Range(0, erodibleCells.Count);
+            var cell = erodibleCells[index];
+            var targetCell = GetErosionTarget(cell);
+
+            cell.Elevation -= 1;
+            targetCell.Elevation += 1;
+
+            if (!IsErodible(cell)) {
+                erodibleCells[index] = erodibleCells[erodibleCells.Count - 1];
+                erodibleCells.RemoveAt(erodibleCells.Count - 1);
+            }
+
+            for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
+                var neighbor = cell.GetNeighbor(d);
+                if (neighbor && neighbor.Elevation == cell.Elevation + 2 && !erodibleCells.Contains(neighbor)) {
+                    erodibleCells.Add(neighbor);
+                }
+            }
+
+            if (IsErodible(targetCell) && !erodibleCells.Contains(targetCell)) {
+                erodibleCells.Add(targetCell);
+            }
+
+            for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
+                var neighbor = targetCell.GetNeighbor(d);
+                if (neighbor && neighbor != cell && neighbor.Elevation == targetCell.Elevation + 1 && !IsErodible(neighbor)) {
+                    erodibleCells.Remove(neighbor);
+                }
+            }
+        }
+
+        ListPool<HexCell>.Add(erodibleCells);
+    }
+
+    private bool IsErodible(HexCell cell) {
+        int erodibleElevation = cell.Elevation - 2;
+        for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
+            HexCell neighbor = cell.GetNeighbor(d);
+            if (neighbor && neighbor.Elevation <= erodibleElevation) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private HexCell GetErosionTarget(HexCell cell) {
+        var candidates = ListPool<HexCell>.Get();
+        var erodibleElevation = cell.Elevation - 2;
+        for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
+            var neighbor = cell.GetNeighbor(d);
+            if (neighbor && neighbor.Elevation <= erodibleElevation) {
+                candidates.Add(neighbor);
+            }
+        }
+
+        // if (candidates.Count == 0) return null;
+        var target = candidates[Random.Range(0, candidates.Count)];
+        ListPool<HexCell>.Add(candidates);
+        return target;
+    }
+
+    #endregion
+
 
     private void SetTerrainType() {
         for (var i = 0; i < cellCount; i++) {
