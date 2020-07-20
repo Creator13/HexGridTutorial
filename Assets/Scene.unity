@@ -1096,6 +1096,8 @@ MonoBehaviour:
   elevationMax: 8
   mapBorderX: 5
   mapBorderZ: 5
+  regionBorder: 5
+  regionCount: 1
   grid: {fileID: 1267205979}
 --- !u!4 &82905480
 Transform:
