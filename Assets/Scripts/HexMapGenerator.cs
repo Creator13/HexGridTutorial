@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 public class HexMapGenerator : MonoBehaviour {
+    [SerializeField] private bool useFixedSeed;
+    [SerializeField] private int seed;
     [SerializeField, Range(0, .5f)] private float jitterProbability = .25f;
     [SerializeField, Range(20, 200)] private int chunkSizeMin = 30;
     [SerializeField, Range(20, 200)] private int chunkSizeMax = 100;
@@ -18,6 +20,15 @@ public class HexMapGenerator : MonoBehaviour {
     private int searchFrontierPhase;
 
     public void GenerateMap(int x, int z) {
+        var originalRandomState = Random.state;
+        if (!useFixedSeed) {
+            seed = Random.Range(0, int.MaxValue);
+            seed ^= (int) System.DateTime.Now.Ticks;
+            seed ^= (int) Time.unscaledTime;
+            seed &= int.MaxValue;
+        }
+        Random.InitState(seed);
+        
         cellCount = x * z;
 
         grid.CreateMap(x, z);
@@ -36,6 +47,8 @@ public class HexMapGenerator : MonoBehaviour {
         for (var i = 0; i < cellCount; i++) {
             grid.GetCell(i).SearchPhase = 0;
         }
+
+        Random.state = originalRandomState;
     }
 
     private void CreateLand() {
