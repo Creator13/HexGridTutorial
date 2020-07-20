@@ -5,6 +5,7 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(20,200)] private int chunkSizeMin = 30;
     [SerializeField, Range(20,200)] private int chunkSizeMax = 100;
     [SerializeField, Range(0, 100)] private int landPercentage = 50;
+    [SerializeField, Range(1, 5)] private int waterLevel = 3;
     
     public HexGrid grid;
 
@@ -15,14 +16,19 @@ public class HexMapGenerator : MonoBehaviour {
     public void GenerateMap(int x, int z) {
         cellCount = x * z;
 
+        grid.CreateMap(x, z);
+
         if (searchFrontier == null) {
             searchFrontier = new PriorityQueue<HexCell>();
         }
 
-        grid.CreateMap(x, z);
+        for (var i = 0; i < cellCount; i++) {
+            grid.GetCell(i).WaterLevel = waterLevel;
+        }
 
         CreateLand();
-        
+        SetTerrainType();
+
         for (var i = 0; i < cellCount; i++) {
             grid.GetCell(i).SearchPhase = 0;
         }
@@ -48,11 +54,9 @@ public class HexMapGenerator : MonoBehaviour {
         var size = 0;
         while (size < chunkSize && searchFrontier.Count > 0) {
             var current = searchFrontier.Dequeue();
-            if (current.TerrainTypeIndex == 0) {
-                current.TerrainTypeIndex = 1;
-                if (--budget == 0) {
-                    break;
-                }
+            current.Elevation += 1;
+            if (current.Elevation == waterLevel && --budget == 0) {
+                break;
             }
 
             size += 1;
@@ -70,6 +74,15 @@ public class HexMapGenerator : MonoBehaviour {
 
         searchFrontier.Clear();
         return budget;
+    }
+
+    private void SetTerrainType() {
+        for (var i = 0; i < cellCount; i++) {
+            var cell = grid.GetCell(i);
+            if (!cell.IsUnderwater) {
+                cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
+            }
+        }
     }
 
     private HexCell GetRandomCell() {
