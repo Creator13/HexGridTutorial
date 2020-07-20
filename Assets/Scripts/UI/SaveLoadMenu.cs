@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SaveLoadMenu : MonoBehaviour {
-    private const int mapFileVersion = 3;
+    private const int mapFileVersion = 4;
     
     [SerializeField] private Text menuLabel, actionButtonLabel;
     [SerializeField] private InputField nameInput;
