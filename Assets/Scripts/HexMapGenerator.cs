@@ -12,12 +12,16 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(1, 5)] private int waterLevel = 3;
     [SerializeField, Range(-4, 0)] private int elevationMin = -2;
     [SerializeField, Range(6, 10)] private int elevationMax = 8;
+    [SerializeField, Range(0, 10)] private int mapBorderX = 5;
+    [SerializeField, Range(0, 10)] private int mapBorderZ = 5;
 
     public HexGrid grid;
 
     private int cellCount;
     private PriorityQueue<HexCell> searchFrontier;
     private int searchFrontierPhase;
+
+    private int xMin, xMax, zMin, zMax;
 
     public void GenerateMap(int x, int z) {
         var originalRandomState = Random.state;
@@ -27,8 +31,9 @@ public class HexMapGenerator : MonoBehaviour {
             seed ^= (int) Time.unscaledTime;
             seed &= int.MaxValue;
         }
+
         Random.InitState(seed);
-        
+
         cellCount = x * z;
 
         grid.CreateMap(x, z);
@@ -40,6 +45,11 @@ public class HexMapGenerator : MonoBehaviour {
         for (var i = 0; i < cellCount; i++) {
             grid.GetCell(i).WaterLevel = waterLevel;
         }
+
+        xMin = mapBorderX;
+        xMax = x - mapBorderX;
+        zMin = mapBorderZ;
+        zMax = z - mapBorderZ;
 
         CreateLand();
         SetTerrainType();
@@ -54,7 +64,7 @@ public class HexMapGenerator : MonoBehaviour {
     private void CreateLand() {
         var landBudget = Mathf.RoundToInt(cellCount * landPercentage * .01f);
 
-        while (landBudget > 0) {
+        for (var guard = 0; landBudget > 0 && guard < 10000; guard++) {
             var chunkSize = Random.Range(chunkSizeMin, chunkSizeMax + 1);
             if (Random.value < sinkProbability) {
                 landBudget = SinkTerrain(chunkSize, landBudget);
@@ -62,6 +72,10 @@ public class HexMapGenerator : MonoBehaviour {
             else {
                 landBudget = RaiseTerrain(chunkSize, landBudget);
             }
+        }
+
+        if (landBudget > 0) {
+            Debug.LogWarning($"Failed to used up {landBudget} land budget.");
         }
     }
 
@@ -161,6 +175,6 @@ public class HexMapGenerator : MonoBehaviour {
     }
 
     private HexCell GetRandomCell() {
-        return grid.GetCell(Random.Range(0, cellCount));
+        return grid.GetCell(Random.Range(xMin, xMax), Random.Range(zMin, zMax));
     }
 }

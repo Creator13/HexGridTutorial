@@ -1094,6 +1094,8 @@ MonoBehaviour:
   waterLevel: 3
   elevationMin: -2
   elevationMax: 8
+  mapBorderX: 5
+  mapBorderZ: 5
   grid: {fileID: 1267205979}
 --- !u!4 &82905480
 Transform:
