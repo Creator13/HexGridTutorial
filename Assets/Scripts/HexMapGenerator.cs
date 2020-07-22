@@ -296,7 +296,8 @@ public class HexMapGenerator : MonoBehaviour {
 
             for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
                 var neighbor = targetCell.GetNeighbor(d);
-                if (neighbor && neighbor != cell && neighbor.Elevation == targetCell.Elevation + 1 && !IsErodible(neighbor)) {
+                if (neighbor && neighbor != cell && neighbor.Elevation == targetCell.Elevation + 1 &&
+                    !IsErodible(neighbor)) {
                     erodibleCells.Remove(neighbor);
                 }
             }
@@ -306,13 +307,14 @@ public class HexMapGenerator : MonoBehaviour {
     }
 
     private bool IsErodible(HexCell cell) {
-        int erodibleElevation = cell.Elevation - 2;
-        for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++) {
-            HexCell neighbor = cell.GetNeighbor(d);
+        var erodibleElevation = cell.Elevation - 2;
+        for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
+            var neighbor = cell.GetNeighbor(d);
             if (neighbor && neighbor.Elevation <= erodibleElevation) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -326,7 +328,6 @@ public class HexMapGenerator : MonoBehaviour {
             }
         }
 
-        // if (candidates.Count == 0) return null;
         var target = candidates[Random.Range(0, candidates.Count)];
         ListPool<HexCell>.Add(candidates);
         return target;
