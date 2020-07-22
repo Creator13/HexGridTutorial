@@ -11,7 +11,7 @@ public class HexMapGenerator : MonoBehaviour {
     private struct ClimateData {
         public float clouds, moisture;
     }
-
+    
     [SerializeField] private bool useFixedSeed;
     [SerializeField] private int seed;
     [SerializeField, Range(0, .5f)] private float jitterProbability = .25f;
@@ -32,6 +32,8 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(0, 1)] private float precipitationFactor = .25f;
     [SerializeField, Range(0, 1)] private float runoffFactor = .25f;
     [SerializeField, Range(0, 1)] private float seepageFactor = .125f;
+    [SerializeField] private HexDirection windDirection = HexDirection.NW;
+    [SerializeField, Range(1, 10)] private float windStrength = 4f;
 
     public HexGrid grid;
 
@@ -380,7 +382,14 @@ public class HexMapGenerator : MonoBehaviour {
         cellClimate.clouds -= precipitation;
         cellClimate.moisture += precipitation;
 
-        var cloudDispersal = cellClimate.clouds * (1f / 6f);
+        var cloudMaximum = 1f - cell.ViewElevation / (elevationMax + 1f);
+        if (cellClimate.clouds > cloudMaximum) {
+            cellClimate.moisture += cellClimate.clouds - cloudMaximum;
+            cellClimate.clouds = cloudMaximum;
+        }
+
+        var mainDispersalDirection = windDirection.Opposite();
+        var cloudDispersal = cellClimate.clouds * (1f / (5f + windStrength));
         var runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
         var seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
         for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
@@ -390,7 +399,12 @@ public class HexMapGenerator : MonoBehaviour {
             }
 
             var neighborClimate = climate[neighbor.Index];
-            neighborClimate.clouds += cloudDispersal;
+            if (d == mainDispersalDirection) {
+                neighborClimate.clouds += cloudDispersal * windStrength;
+            }
+            else {
+                neighborClimate.clouds += cloudDispersal;
+            }
 
             var elevationDelta = neighbor.ViewElevation - cell.ViewElevation;
             if (elevationDelta < 0) {

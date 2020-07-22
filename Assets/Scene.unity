@@ -1084,7 +1084,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedSeed: 1
-  seed: 541042879
+  seed: 117733368
   jitterProbability: 0.25
   chunkSizeMin: 30
   chunkSizeMax: 100
@@ -1099,8 +1099,12 @@ MonoBehaviour:
   regionBorder: 5
   regionCount: 1
   erosionPercentage: 50
-  evaporation: 0.5
+  evaporationFactor: 0.5
   precipitationFactor: 0.25
+  runoffFactor: 0.25
+  seepageFactor: 0.125
+  windDirection: 5
+  windStrength: 4
   grid: {fileID: 1267205979}
 --- !u!4 &82905480
 Transform:
