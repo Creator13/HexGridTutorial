@@ -1108,6 +1108,10 @@ MonoBehaviour:
   windStrength: 4
   riverPercentage: 10
   extraLakeProbability: 0.25
+  lowTemperature: 0
+  highTemperature: 1
+  hemisphere: 0
+  temperatureJitter: 0.1
   grid: {fileID: 1267205979}
 --- !u!4 &82905480
 Transform:

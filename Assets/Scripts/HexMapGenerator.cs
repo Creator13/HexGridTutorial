@@ -12,6 +12,8 @@ public class HexMapGenerator : MonoBehaviour {
         public float clouds, moisture;
     }
 
+    public enum HemisphereMode { Both, North, South }
+
     [SerializeField] private bool useFixedSeed;
     [SerializeField] private int seed;
     [SerializeField, Range(0, .5f)] private float jitterProbability = .25f;
@@ -37,12 +39,17 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(1, 10)] private float windStrength = 4f;
     [SerializeField, Range(0, 20)] private int riverPercentage = 10;
     [SerializeField, Range(0, 1)] private float extraLakeProbability = .25f;
+    [SerializeField, Range(0, 1)] private float lowTemperature = 0;
+    [SerializeField, Range(0, 1)] private float highTemperature = 1;
+    [SerializeField] private HemisphereMode hemisphere;
+    [SerializeField, Range(0, 1)] private float temperatureJitter = .1f;
 
     public HexGrid grid;
 
     private int cellCount, landCells;
     private PriorityQueue<HexCell> searchFrontier;
     private int searchFrontierPhase;
+    private int temperatureJitterChannel;
 
     private List<MapRegion> regions;
     private List<ClimateData> climate = new List<ClimateData>();
@@ -443,6 +450,26 @@ public class HexMapGenerator : MonoBehaviour {
         climate[cellIndex] = new ClimateData();
     }
 
+    private float DetermineTemperature(HexCell cell) {
+        var latitude = (float) cell.coordinates.Z / grid.cellCountZ;
+        
+        if (hemisphere == HemisphereMode.Both) {
+            latitude *= 2f;
+            if (latitude > 1) {
+                latitude = 2 - latitude;
+            }
+        }
+        else if (hemisphere == HemisphereMode.North) {
+            latitude = 1 - latitude;
+        }
+
+        var temp = Mathf.LerpUnclamped(lowTemperature, highTemperature, latitude);
+        temp *= 1f - (cell.ViewElevation - waterLevel) / (elevationMax - waterLevel + 1f);
+        var jitter = HexMetrics.SampleNoise(cell.Position * .1f)[temperatureJitterChannel];
+        temp += (jitter * 2f - 1f) * temperatureJitter;
+        return temp;
+    }
+
     #endregion
 
 
@@ -573,7 +600,7 @@ public class HexMapGenerator : MonoBehaviour {
                 cell.WaterLevel = cell.Elevation;
                 cell.Elevation -= 1;
             }
-            
+
             cell = cell.GetNeighbor(dir);
         }
 
@@ -584,6 +611,7 @@ public class HexMapGenerator : MonoBehaviour {
 
 
     private void SetTerrainType() {
+        temperatureJitterChannel = Random.Range(0, 4);
         for (var i = 0; i < cellCount; i++) {
             var cell = grid.GetCell(i);
             var moisture = climate[i].moisture;
@@ -608,7 +636,7 @@ public class HexMapGenerator : MonoBehaviour {
                 cell.TerrainTypeIndex = 2;
             }
 
-            var data = moisture;
+            var data = DetermineTemperature(cell);
             cell.SetMapData(data);
         }
     }
