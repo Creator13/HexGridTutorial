@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class HexMapGenerator : MonoBehaviour {
@@ -10,7 +9,7 @@ public class HexMapGenerator : MonoBehaviour {
     }
 
     private struct ClimateData {
-        public float clouds;
+        public float clouds, moisture;
     }
 
     [SerializeField] private bool useFixedSeed;
@@ -29,8 +28,10 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(0, 10)] private int regionBorder = 5;
     [SerializeField, Range(1, 4)] private int regionCount = 1;
     [SerializeField, Range(0, 100)] private int erosionPercentage = 50;
-    [SerializeField, Range(0, 1)] private float evaporation = .5f;
+    [SerializeField, Range(0, 1)] private float evaporationFactor = .5f;
     [SerializeField, Range(0, 1)] private float precipitationFactor = .25f;
+    [SerializeField, Range(0, 1)] private float runoffFactor = .25f;
+    [SerializeField, Range(0, 1)] private float seepageFactor = .125f;
 
     public HexGrid grid;
 
@@ -353,26 +354,35 @@ public class HexMapGenerator : MonoBehaviour {
         for (var i = 0; i < cellCount; i++) {
             climate.Add(initialData);
         }
-        
+
         for (var cycle = 0; cycle < 40; cycle++) {
             for (var i = 0; i < cellCount; i++) {
                 EvolveClimate(i);
             }
         }
     }
-    
+
     private void EvolveClimate(int cellIndex) {
         var cell = grid.GetCell(cellIndex);
         var cellClimate = climate[cellIndex];
 
         if (cell.IsUnderwater) {
+            cellClimate.moisture = 1f;
+            cellClimate.clouds += evaporationFactor;
+        }
+        else {
+            var evaporation = cellClimate.moisture * evaporationFactor;
+            cellClimate.moisture = evaporation;
             cellClimate.clouds += evaporation;
         }
 
         var precipitation = cellClimate.clouds * precipitationFactor;
         cellClimate.clouds -= precipitation;
+        cellClimate.moisture += precipitation;
 
         var cloudDispersal = cellClimate.clouds * (1f / 6f);
+        var runoff = cellClimate.moisture * runoffFactor * (1f / 6f);
+        var seepage = cellClimate.moisture * seepageFactor * (1f / 6f);
         for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
             var neighbor = cell.GetNeighbor(d);
             if (!neighbor) {
@@ -381,22 +391,36 @@ public class HexMapGenerator : MonoBehaviour {
 
             var neighborClimate = climate[neighbor.Index];
             neighborClimate.clouds += cloudDispersal;
+
+            var elevationDelta = neighbor.ViewElevation - cell.ViewElevation;
+            if (elevationDelta < 0) {
+                cellClimate.moisture -= runoff;
+                neighborClimate.moisture += runoff;
+            }
+            else if (elevationDelta == 0) {
+                cellClimate.moisture -= seepage;
+                neighborClimate.moisture += seepage;
+            }
+
             climate[neighbor.Index] = neighborClimate;
         }
+
         cellClimate.clouds = 0;
 
         climate[cellIndex] = cellClimate;
     }
 
     #endregion
-    
+
+
     private void SetTerrainType() {
         for (var i = 0; i < cellCount; i++) {
             var cell = grid.GetCell(i);
             if (!cell.IsUnderwater) {
                 cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
             }
-            cell.SetMapData(climate[i].clouds);
+
+            cell.SetMapData(climate[i].moisture);
         }
     }
 
