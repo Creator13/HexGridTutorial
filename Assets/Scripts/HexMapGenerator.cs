@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,12 +9,16 @@ public class HexMapGenerator : MonoBehaviour {
         public int xMin, xMax, zMin, zMax;
     }
 
+    private struct ClimateData {
+        public float clouds;
+    }
+
     [SerializeField] private bool useFixedSeed;
     [SerializeField] private int seed;
     [SerializeField, Range(0, .5f)] private float jitterProbability = .25f;
     [SerializeField, Range(20, 200)] private int chunkSizeMin = 30;
     [SerializeField, Range(20, 200)] private int chunkSizeMax = 100;
-    [SerializeField, Range(0, 1f)] private float highriseProbability = .25f;
+    [SerializeField, Range(0, 1)] private float highriseProbability = .25f;
     [SerializeField, Range(0, .4f)] private float sinkProbability = .2f;
     [SerializeField, Range(0, 100)] private int landPercentage = 50;
     [SerializeField, Range(1, 5)] private int waterLevel = 3;
@@ -24,6 +29,8 @@ public class HexMapGenerator : MonoBehaviour {
     [SerializeField, Range(0, 10)] private int regionBorder = 5;
     [SerializeField, Range(1, 4)] private int regionCount = 1;
     [SerializeField, Range(0, 100)] private int erosionPercentage = 50;
+    [SerializeField, Range(0, 1)] private float evaporation = .5f;
+    [SerializeField, Range(0, 1)] private float precipitationFactor = .25f;
 
     public HexGrid grid;
 
@@ -32,6 +39,7 @@ public class HexMapGenerator : MonoBehaviour {
     private int searchFrontierPhase;
 
     private List<MapRegion> regions;
+    private List<ClimateData> climate = new List<ClimateData>();
 
     public void GenerateMap(int x, int z) {
         var originalRandomState = Random.state;
@@ -59,6 +67,7 @@ public class HexMapGenerator : MonoBehaviour {
         CreateRegions();
         CreateLand();
         ErodeLand();
+        CreateClimate();
         SetTerrainType();
 
         for (var i = 0; i < cellCount; i++) {
@@ -336,12 +345,58 @@ public class HexMapGenerator : MonoBehaviour {
     #endregion
 
 
+    #region Climate
+
+    private void CreateClimate() {
+        climate.Clear();
+        var initialData = new ClimateData();
+        for (var i = 0; i < cellCount; i++) {
+            climate.Add(initialData);
+        }
+        
+        for (var cycle = 0; cycle < 40; cycle++) {
+            for (var i = 0; i < cellCount; i++) {
+                EvolveClimate(i);
+            }
+        }
+    }
+    
+    private void EvolveClimate(int cellIndex) {
+        var cell = grid.GetCell(cellIndex);
+        var cellClimate = climate[cellIndex];
+
+        if (cell.IsUnderwater) {
+            cellClimate.clouds += evaporation;
+        }
+
+        var precipitation = cellClimate.clouds * precipitationFactor;
+        cellClimate.clouds -= precipitation;
+
+        var cloudDispersal = cellClimate.clouds * (1f / 6f);
+        for (var d = HexDirection.NE; d <= HexDirection.NW; d++) {
+            var neighbor = cell.GetNeighbor(d);
+            if (!neighbor) {
+                continue;
+            }
+
+            var neighborClimate = climate[neighbor.Index];
+            neighborClimate.clouds += cloudDispersal;
+            climate[neighbor.Index] = neighborClimate;
+        }
+        cellClimate.clouds = 0;
+
+        climate[cellIndex] = cellClimate;
+    }
+
+    #endregion
+    
     private void SetTerrainType() {
         for (var i = 0; i < cellCount; i++) {
             var cell = grid.GetCell(i);
             if (!cell.IsUnderwater) {
                 cell.TerrainTypeIndex = cell.Elevation - cell.WaterLevel;
             }
+            cell.SetMapData(climate[i].clouds);
         }
     }
 

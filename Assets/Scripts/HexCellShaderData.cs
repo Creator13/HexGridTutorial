@@ -66,6 +66,11 @@ public class HexCellShaderData : MonoBehaviour {
         enabled = true;
     }
 
+    public void SetMapData(HexCell cell, float data) {
+        cellTextureData[cell.Index].b = data < 0 ? (byte) 0 : (data < 1f ? (byte) (data * 254f) : (byte) 254);
+        enabled = true;
+    }
+
     private void LateUpdate() {
         if (needsVisibilityReset) {
             needsVisibilityReset = false;

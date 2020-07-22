@@ -235,6 +235,10 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
         highlight.enabled = false;
     }
 
+    public void SetMapData(float data) {
+        ShaderData.SetMapData(this, data);
+    }
+
 
     #region Visibility
 
