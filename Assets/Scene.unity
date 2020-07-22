@@ -1106,6 +1106,8 @@ MonoBehaviour:
   seepageFactor: 0.125
   windDirection: 5
   windStrength: 4
+  riverPercentage: 10
+  extraLakeProbability: 0.25
   grid: {fileID: 1267205979}
 --- !u!4 &82905480
 Transform:

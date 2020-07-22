@@ -198,7 +198,7 @@ public class HexGridChunk : MonoBehaviour {
             center2 + HexMetrics.GetFirstSolidCorner(dir.Opposite())
         );
         if (cell.HasRiverThroughEdge(dir)) {
-            TriangulateEstuary(e1, e2, cell.IncomingRiver == dir, indices);
+            TriangulateEstuary(e1, e2, cell.HasIncomingRiver && cell.IncomingRiver == dir, indices);
         }
         else {
             waterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
