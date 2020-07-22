@@ -1084,7 +1084,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useFixedSeed: 1
-  seed: 117733368
+  seed: 65440540
   jitterProbability: 0.25
   chunkSizeMin: 30
   chunkSizeMax: 100
@@ -1099,6 +1099,7 @@ MonoBehaviour:
   regionBorder: 5
   regionCount: 1
   erosionPercentage: 50
+  startingMoisture: 0.1
   evaporationFactor: 0.5
   precipitationFactor: 0.25
   runoffFactor: 0.25
