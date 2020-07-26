@@ -24,7 +24,7 @@ public class HexGrid : MonoBehaviour {
     public bool wrapping;
 
     private int currentCenterColumnIndex = -1;
-    
+
     private PriorityQueue<HexCell> searchFrontier;
     private int searchFrontierPhase;
     private HexCell currentPathFrom, currentPathTo;
@@ -87,8 +87,7 @@ public class HexGrid : MonoBehaviour {
     public HexCell GetCell(Vector3 position) {
         position = transform.InverseTransformPoint(position);
         var coordinates = HexCoordinates.FromPosition(position);
-        var index = coordinates.X + coordinates.Z * cellCountX + coordinates.Z / 2;
-        return cells[index];
+        return GetCell(coordinates);
     }
 
     public HexCell GetCell(HexCoordinates coords) {
@@ -165,12 +164,16 @@ public class HexGrid : MonoBehaviour {
         cell.transform.localPosition = position;
         cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
         cell.Index = i;
+        cell.ColumnIndex = x / HexMetrics.chunkSizeX;
         cell.ShaderData = cellShaderData;
 
         cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
 
         if (x > 0) {
             cell.SetNeighbor(HexDirection.W, cells[i - 1]);
+            if (wrapping && x == cellCountX - 1) {
+                cell.SetNeighbor(HexDirection.E, cells[i - x]);
+            }
         }
 
         if (z > 0) {
@@ -179,11 +182,17 @@ public class HexGrid : MonoBehaviour {
                 if (x > 0) {
                     cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX - 1]);
                 }
+                else if (wrapping) {
+                    cell.SetNeighbor(HexDirection.SW, cells[i - 1]);
+                }
             }
             else {
                 cell.SetNeighbor(HexDirection.SW, cells[i - cellCountX]);
                 if (x < cellCountX - 1) {
                     cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX + 1]);
+                }
+                else if (wrapping) {
+                    cell.SetNeighbor(HexDirection.SE, cells[i - cellCountX * 2 + 1]);
                 }
             }
         }
@@ -231,11 +240,12 @@ public class HexGrid : MonoBehaviour {
             else {
                 pos.x = 0;
             }
+
             columns[i].localPosition = pos;
         }
     }
-    
-    
+
+
     #region Units
 
     private List<Unit> units = new List<Unit>();

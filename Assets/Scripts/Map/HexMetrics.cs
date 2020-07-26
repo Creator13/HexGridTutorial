@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 
-public enum HexEdgeType {
-    Flat, Slope, Cliff
-}
+public enum HexEdgeType { Flat, Slope, Cliff }
 
 public static class HexMetrics {
     public const int hashGridSize = 256;
@@ -16,10 +14,10 @@ public static class HexMetrics {
         new[] {0.0f, 0.4f, 0.6f},
         new[] {0.4f, 0.6f, 0.8f}
     };
-    
+
     public const float outerToInner = .866025404f;
     public const float innerToOuter = 1f / outerToInner;
-    
+
     public const float outerRadius = 10;
     public const float innerRadius = outerRadius * outerToInner;
     public const float innerDiameter = innerRadius * 2f;
@@ -68,7 +66,7 @@ public static class HexMetrics {
     public static int wrapSize;
 
     public static bool Wrapping => wrapSize > 0;
-    
+
     public static Vector3 GetFirstCorner(HexDirection dir) {
         return corners[(int) dir];
     }
@@ -80,7 +78,7 @@ public static class HexMetrics {
     public static Vector3 GetFirstWaterCorner(HexDirection dir) {
         return corners[(int) dir] * waterFactor;
     }
-    
+
     public static Vector3 GetSecondWaterCorner(HexDirection dir) {
         return corners[(int) dir + 1] * waterFactor;
     }
@@ -96,7 +94,7 @@ public static class HexMetrics {
     public static Vector3 GetSolidEdgeMiddle(HexDirection dir) {
         return (corners[(int) dir] + corners[(int) dir + 1]) * (.5f * solidFactor);
     }
-    
+
     public static Vector3 GetBridge(HexDirection dir) {
         return (corners[(int) dir] + corners[(int) dir + 1]) * blendFactor;
     }
@@ -104,7 +102,7 @@ public static class HexMetrics {
     public static Vector3 GetWaterBridge(HexDirection dir) {
         return (corners[(int) dir] + corners[(int) dir + 1]) * waterBlendFactor;
     }
-    
+
     public static Vector3 TerraceLerp(Vector3 a, Vector3 b, int step) {
         var h = step * horizontalTerraceStepSize;
         a.x += (b.x - a.x) * h;
@@ -135,9 +133,17 @@ public static class HexMetrics {
     }
 
     public static Vector4 SampleNoise(Vector3 pos) {
-        return noiseSource.GetPixelBilinear(pos.x * noiseScale, pos.z * noiseScale);
+        var sample = noiseSource.GetPixelBilinear(pos.x * noiseScale, pos.z * noiseScale);
+
+        if (Wrapping && pos.x < innerDiameter * 1.5f) {
+            var sample2 =
+                noiseSource.GetPixelBilinear((pos.x + wrapSize * innerDiameter) * noiseScale, pos.z * noiseScale);
+            sample = Vector4.Lerp(sample2, sample, pos.x * (1f / innerDiameter) - .5f);
+        }
+
+        return sample;
     }
-    
+
     public static Vector3 Perturb(Vector3 pos) {
         var sample = SampleNoise(pos);
         pos.x += (sample.x * 2f - 1f) * cellPerturbStrength;
@@ -149,7 +155,7 @@ public static class HexMetrics {
         hashGrid = new HexHash[hashGridSize * hashGridSize];
 
         var currentState = Random.state;
-        
+
         Random.InitState(seed);
         for (var i = 0; i < hashGrid.Length; i++) {
             hashGrid[i] = HexHash.Create();
@@ -160,9 +166,9 @@ public static class HexMetrics {
 
     public static HexHash SampleHashGrid(Vector3 pos) {
         var x = (int) (pos.x * hashGridScale) % hashGridSize;
-        if (x < 0) x += hashGridSize; 
+        if (x < 0) x += hashGridSize;
         var z = (int) (pos.z * hashGridScale) % hashGridSize;
-        if (z < 0) z += hashGridSize; 
+        if (z < 0) z += hashGridSize;
         return hashGrid[x + z * hashGridSize];
     }
 

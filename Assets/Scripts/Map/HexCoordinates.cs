@@ -9,6 +9,15 @@ public struct HexCoordinates {
     public int Y => -X - Z;
 
     public HexCoordinates(int x, int z) {
+        if (HexMetrics.Wrapping) {
+            var oX = x + z / 2;
+            if (oX < 0) {
+                x += HexMetrics.wrapSize;
+            }
+            else if (oX >= HexMetrics.wrapSize) {
+                x -= HexMetrics.wrapSize;
+            }
+        }
         this.x = x;
         this.z = z;
     }
@@ -47,9 +56,26 @@ public struct HexCoordinates {
     }
 
     public int DistanceTo(HexCoordinates other) {
-        return ((X < other.X ? other.X - X : X - other.X) +
-                (Y < other.Y ? other.Y - Y : Y - other.Y) +
-                (Z < other.Z ? other.Z - Z : Z - other.Z)) / 2;
+        // return ((X < other.X ? other.X - X : X - other.X) +
+        //         (Y < other.Y ? other.Y - Y : Y - other.Y) +
+        //         (Z < other.Z ? other.Z - Z : Z - other.Z)) / 2;
+        var xy = (x < other.x ? other.x - x : x - other.x) + (Y < other.Y ? other.Y - Y : Y - other.Y);
+
+        if (HexMetrics.Wrapping) {
+            other.x += HexMetrics.wrapSize;
+            var xyWrapped = (x < other.x ? other.x - x : x - other.x) + (Y < other.Y ? other.Y - Y : Y - other.Y);
+            if (xyWrapped < xy) {
+                xy = xyWrapped;
+            }
+            else {
+                other.x -= 2 * HexMetrics.wrapSize;
+                xyWrapped = (x < other.x ? other.x - x : x - other.x) + (Y < other.Y ? other.Y - Y : Y - other.Y);
+                if (xyWrapped < xy) {
+                    xy = xyWrapped;
+                }
+            }
+        }
+        return (xy + (z < other.z ? other.z - z : z - other.z)) / 2;
     }
 
     public void Save(BinaryWriter writer) {

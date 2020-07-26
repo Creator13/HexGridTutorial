@@ -21,6 +21,7 @@ public class HexCell : MonoBehaviour, IPriorityQueueItem {
 
     public HexCellShaderData ShaderData { get; set; }
     public int Index { get; set; }
+    public int ColumnIndex { get; set; }
 
     private bool explored;
     public bool IsExplored {

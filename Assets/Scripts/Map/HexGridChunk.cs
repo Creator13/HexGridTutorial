@@ -192,6 +192,12 @@ public class HexGridChunk : MonoBehaviour {
         water.AddTriangleCellData(indices, weights1);
 
         var center2 = neighbor.Position;
+        if (neighbor.ColumnIndex < cell.ColumnIndex - 1) {
+            center2.x += HexMetrics.wrapSize * HexMetrics.innerDiameter;
+        }
+        else if (neighbor.ColumnIndex > cell.ColumnIndex + 1) {
+            center2.x -= HexMetrics.wrapSize * HexMetrics.innerDiameter;
+        }
         center2.y = center.y;
         var e2 = new EdgeVertices(
             center2 + HexMetrics.GetSecondSolidCorner(dir.Opposite()),
@@ -217,7 +223,14 @@ public class HexGridChunk : MonoBehaviour {
 
         var nextNeighbor = cell.GetNeighbor(dir.Next());
         if (nextNeighbor != null) {
-            var v3 = nextNeighbor.Position + (nextNeighbor.IsUnderwater
+            var center3 = nextNeighbor.Position;
+            if (nextNeighbor.ColumnIndex < cell.ColumnIndex - 1) {
+                center3.x += HexMetrics.wrapSize * HexMetrics.innerDiameter;
+            }
+            else if (nextNeighbor.ColumnIndex > cell.ColumnIndex + 1) {
+                center3.x -= HexMetrics.wrapSize * HexMetrics.innerDiameter;
+            }
+            var v3 = center3 + (nextNeighbor.IsUnderwater
                 ? HexMetrics.GetFirstWaterCorner(dir.Previous())
                 : HexMetrics.GetFirstSolidCorner(dir.Previous()));
             v3.y = center.y;
