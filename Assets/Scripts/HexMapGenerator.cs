@@ -75,7 +75,7 @@ public class HexMapGenerator : MonoBehaviour {
     private List<ClimateData> nextClimate = new List<ClimateData>();
     private List<HexDirection> flowDirections = new List<HexDirection>();
 
-    public void GenerateMap(int x, int z) {
+    public void GenerateMap(int x, int z, bool wrapping) {
         var originalRandomState = Random.state;
         if (!useFixedSeed) {
             seed = Random.Range(0, int.MaxValue);
@@ -88,7 +88,7 @@ public class HexMapGenerator : MonoBehaviour {
 
         cellCount = x * z;
 
-        grid.CreateMap(x, z);
+        grid.CreateMap(x, z, wrapping);
 
         if (searchFrontier == null) {
             searchFrontier = new PriorityQueue<HexCell>();

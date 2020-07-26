@@ -80,7 +80,7 @@ public class HexMapCamera : MonoBehaviour {
     }
 
     private Vector3 ClampPosition(Vector3 pos) {
-        var xMax = (grid.cellCountX - 0.5f) * (2f * HexMetrics.innerRadius);
+        var xMax = (grid.cellCountX - 0.5f) * HexMetrics.innerDiameter;
         pos.x = Mathf.Clamp(pos.x, 0, xMax);
 
         var zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);

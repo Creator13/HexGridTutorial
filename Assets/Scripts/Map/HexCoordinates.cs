@@ -18,7 +18,7 @@ public struct HexCoordinates {
     }
 
     public static HexCoordinates FromPosition(Vector3 position) {
-        var x = position.x / (HexMetrics.innerRadius * 2f);
+        var x = position.x / HexMetrics.innerDiameter;
         var y = -x;
 
         var offset = position.z / (HexMetrics.outerRadius * 3f);

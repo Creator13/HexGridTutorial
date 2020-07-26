@@ -22,6 +22,7 @@ public static class HexMetrics {
     
     public const float outerRadius = 10;
     public const float innerRadius = outerRadius * outerToInner;
+    public const float innerDiameter = innerRadius * 2f;
 
     public const float solidFactor = .8f;
     public const float blendFactor = 1 - solidFactor;
@@ -64,6 +65,10 @@ public static class HexMetrics {
         new Vector3(0, 0, outerRadius)
     };
 
+    public static int wrapSize;
+
+    public static bool Wrapping => wrapSize > 0;
+    
     public static Vector3 GetFirstCorner(HexDirection dir) {
         return corners[(int) dir];
     }
