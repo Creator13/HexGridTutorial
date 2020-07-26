@@ -19,9 +19,12 @@ public class HexGrid : MonoBehaviour {
 
     private HexCell[] cells;
     private HexGridChunk[] chunks;
+    private Transform[] columns;
     private HexCellShaderData cellShaderData;
-    private bool wrapping;
+    public bool wrapping;
 
+    private int currentCenterColumnIndex = -1;
+    
     private PriorityQueue<HexCell> searchFrontier;
     private int searchFrontierPhase;
     private HexCell currentPathFrom, currentPathTo;
@@ -58,15 +61,16 @@ public class HexGrid : MonoBehaviour {
         ClearUnits();
 
         // Destroy existing chunks
-        if (chunks != null) {
-            foreach (var chunk in chunks) {
-                Destroy(chunk.gameObject);
+        if (columns != null) {
+            foreach (var column in columns) {
+                Destroy(column.gameObject);
             }
         }
 
         cellCountX = x;
         cellCountZ = z;
         this.wrapping = wrapping;
+        currentCenterColumnIndex = -1;
         HexMetrics.wrapSize = wrapping ? cellCountX : 0;
 
         chunkCountX = cellCountX / HexMetrics.chunkSizeX;
@@ -134,12 +138,18 @@ public class HexGrid : MonoBehaviour {
     }
 
     private void CreateChunks() {
+        columns = new Transform[chunkCountX];
+        for (var x = 0; x < chunkCountX; x++) {
+            columns[x] = new GameObject("Column").transform;
+            columns[x].SetParent(transform, false);
+        }
+
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
         for (int z = 0, i = 0; z < chunkCountZ; z++) {
             for (var x = 0; x < chunkCountX; x++) {
                 var chunk = chunks[i++] = Instantiate(chunkPrefab);
-                chunk.transform.SetParent(transform);
+                chunk.transform.SetParent(columns[x], false);
             }
         }
     }
@@ -158,7 +168,7 @@ public class HexGrid : MonoBehaviour {
         cell.ShaderData = cellShaderData;
 
         cell.Explorable = x > 0 && z > 0 && x < cellCountX - 1 && z < cellCountZ - 1;
-        
+
         if (x > 0) {
             cell.SetNeighbor(HexDirection.W, cells[i - 1]);
         }
@@ -197,7 +207,35 @@ public class HexGrid : MonoBehaviour {
         chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
     }
 
+    public void CenterMap(float xPos) {
+        var centerColumnIndex = (int) (xPos / (HexMetrics.innerDiameter * HexMetrics.chunkSizeX));
 
+        if (centerColumnIndex == currentCenterColumnIndex) {
+            return;
+        }
+
+        currentCenterColumnIndex = centerColumnIndex;
+
+        var minColumnIndex = centerColumnIndex - chunkCountX / 2;
+        var maxColumnIndex = centerColumnIndex + chunkCountX / 2;
+
+        Vector3 pos;
+        pos.y = pos.z = 0;
+        for (var i = 0; i < columns.Length; i++) {
+            if (i < minColumnIndex) {
+                pos.x = chunkCountX * (HexMetrics.innerDiameter * HexMetrics.chunkSizeX);
+            }
+            else if (i > maxColumnIndex) {
+                pos.x = chunkCountX * -(HexMetrics.innerDiameter * HexMetrics.chunkSizeX);
+            }
+            else {
+                pos.x = 0;
+            }
+            columns[i].localPosition = pos;
+        }
+    }
+    
+    
     #region Units
 
     private List<Unit> units = new List<Unit>();

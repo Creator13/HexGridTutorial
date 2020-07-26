@@ -10417,6 +10417,7 @@ MonoBehaviour:
   seed: 1234
   unitPrefab: {fileID: 4533438245600774795, guid: 0f11d4521d3227a418fb99f72d7261db,
     type: 3}
+  wrapping: 1
 --- !u!4 &1267205980
 Transform:
   m_ObjectHideFlags: 0

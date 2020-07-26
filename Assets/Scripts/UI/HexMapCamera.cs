@@ -21,10 +21,13 @@ public class HexMapCamera : MonoBehaviour {
     private float rotationAngle;
     
     private void Awake() {
-        instance = this;
-        
         swivel = transform.GetChild(0);
         stick = swivel.GetChild(0);
+    }
+
+    private void Start() {
+        instance = this;
+        ValidatePosition();
     }
 
     [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
@@ -63,7 +66,7 @@ public class HexMapCamera : MonoBehaviour {
 
         var position = transform.localPosition;
         position += direction * distance;
-        transform.localPosition = ClampPosition(position);
+        transform.localPosition = grid.wrapping ? WrapPosition(position) : ClampPosition(position);
     }
 
     private void AdjustRotation(float delta) {
@@ -89,6 +92,23 @@ public class HexMapCamera : MonoBehaviour {
         return pos;
     }
 
+    private Vector3 WrapPosition(Vector3 pos) {
+        var width = grid.cellCountX * HexMetrics.innerDiameter;
+        while (pos.x < 0) {
+            pos.x += width;
+        }
+
+        while (pos.x > width) {
+            pos.x -= width;
+        }
+
+        var zMax = (grid.cellCountZ - 1) * (1.5f * HexMetrics.outerRadius);
+        pos.z = Mathf.Clamp(pos.z, 0, zMax);
+
+        grid.CenterMap(pos.x);
+        return pos;
+    }
+    
     public static void ValidatePosition() {
         instance.AdjustPosition(0, 0);
     }
